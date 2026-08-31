@@ -226,7 +226,7 @@ export default function PoolPage() {
           <span className="font-mono text-[10px] font-bold uppercase text-on-surface-variant">
             Void
           </span>
-          <span className="font-semibold text-on-surface-variant">CANCELED</span>
+          <span className="font-semibold text-on-surface-variant">REFUNDED</span>
           <span className="font-mono text-[12px] text-on-surface-variant">
             Buyer-only, and only before the coverage day starts.
           </span>

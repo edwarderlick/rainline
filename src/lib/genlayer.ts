@@ -114,7 +114,7 @@ export async function switchToStudioNet(provider?: EthereumProvider): Promise<vo
 
 /**
  * The UI never labels a cover Paid unless get_cover.state is RESOLVED_PAY
- * or INSUFFICIENT/CANCELED after the matching write receipt.
+ * or INSUFFICIENT/REFUNDED after the matching write receipt.
  */
 export function explorerHint(): string {
   return hasContract()

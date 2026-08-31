@@ -77,15 +77,21 @@ export function DocketActions({
           <span>{busy === "resolve" ? "resolve pending" : "resolve"}</span>
           <Icon name={canResolve ? "bolt" : "lock"} />
         </button>
-        <button
-          type="button"
-          disabled={!canWithdraw || busy !== null || Boolean(wallet.writesBlocked)}
-          onClick={() => void run("withdraw", () => writeWithdraw(wallet.address))}
-          className="flex w-full items-center justify-between border border-outline bg-surface px-4 py-3 text-left text-2xl font-semibold text-on-surface disabled:cursor-not-allowed disabled:opacity-50 disabled:text-on-surface-variant"
-        >
-          <span>{busy === "withdraw" ? "withdraw pending" : "withdraw"}</span>
-          <Icon name="output" />
-        </button>
+        {note.includes("native transfer failed") ? (
+          <div className="flex w-full items-center justify-between border border-[#8B4513] bg-[#E9967A] px-4 py-3 text-left text-sm font-semibold text-white">
+            <span>⚠️ StudioNet native transfer failed. Payout secured in contract credits. Use fallback withdrawal (coming soon).</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={!canWithdraw || busy !== null || Boolean(wallet.writesBlocked)}
+            onClick={() => void run("withdraw", () => writeWithdraw(wallet.address))}
+            className="flex w-full items-center justify-between border border-outline bg-surface px-4 py-3 text-left text-2xl font-semibold text-on-surface disabled:cursor-not-allowed disabled:opacity-50 disabled:text-on-surface-variant"
+          >
+            <span>{busy === "withdraw" ? "WITHDRAWING..." : "withdraw"}</span>
+            {busy === "withdraw" ? <span className="animate-spin text-xl">⏳</span> : <Icon name="output" />}
+          </button>
+        )}
         {hash ? <TxHash hash={hash} /> : null}
         {note ? <p className="font-mono text-[12px] text-tertiary">{note}</p> : null}
       </div>

@@ -75,7 +75,8 @@ const deployReceipt = await client.waitForTransactionReceipt({
 
 const contractAddress = deployReceipt.contract_address
   || deployReceipt.contractAddress
-  || deployReceipt.creates;
+  || deployReceipt.creates
+  || deployReceipt.recipient;
 console.log("\n========================================");
 console.log("CONTRACT DEPLOYED!");
 console.log("Address:", contractAddress);

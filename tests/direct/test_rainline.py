@@ -96,12 +96,12 @@ def test_cancel_refunds_buyer_only(direct_vm, deployed, direct_alice, direct_bob
     direct_vm.sender = direct_alice
     deployed.cancel_cover(cover_id)
     cover = deployed.get_cover(cover_id)
-    assert cover["state"] == "CANCELED"
+    assert cover["state"] == "REFUNDED"
     pool = deployed.get_pool()
     assert pool["reserved_payout"] == 0
 
 
-def test_resolve_pay_from_storage_not_cache(direct_vm, deployed, direct_alice):
+def test_resolve_pay_happy_path(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
     real_now = deployed._instance._now
@@ -148,8 +148,8 @@ def test_keep_does_not_pay_buyer(direct_vm, deployed, direct_alice):
     direct_vm.value = 10**18
     real_now = deployed._instance._now
     deployed._instance._now = lambda: datetime(2026, 8, 10, tzinfo=timezone.utc)
-    pool_before = deployed.get_pool()
     cover_id = deployed.buy_cover("RAIN", "40.7128", "-74.0060", "2026-08-18", 50000)
+    pool_after_buy = deployed.get_pool()
     mock_meteo(direct_vm, "40.7128", "-74.0060", "2026-08-18", "precipitation_sum", 1.0)
     deployed._instance._now = lambda: datetime(2026, 8, 25, tzinfo=timezone.utc)
     deployed.resolve(cover_id)
@@ -158,9 +158,11 @@ def test_keep_does_not_pay_buyer(direct_vm, deployed, direct_alice):
     assert cover["state"] == "RESOLVED_KEEP"
     assert cover["result"]["amount_wei"] == "0"
     
-    pool_after = deployed.get_pool()
-    # The pool balance should be exactly pool_before["pool_balance"] + premium
-    assert pool_after["pool_balance"] == pool_before["pool_balance"] + 10**18
+    pool_after_resolve = deployed.get_pool()
+    # The pool balance delta is exactly 0 between resolve and buy (premium kept)
+    assert pool_after_resolve["pool_balance"] - pool_after_buy["pool_balance"] == 0
+    # Reserve is released
+    assert pool_after_resolve["reserved_payout"] == pool_after_buy["reserved_payout"] - cover["payout"]
 
 def test_resolve_reverts_before_day_closed(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice

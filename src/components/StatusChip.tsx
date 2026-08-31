@@ -21,7 +21,7 @@ export function StatusChip({ state }: { state: CoverState }) {
       </span>
       {paid ? (
         <span className="border border-secondary bg-secondary-container px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
-          Paid
+          {state === "REFUNDED" || state === "INSUFFICIENT" ? "Refunded" : "Paid"}
         </span>
       ) : null}
     </span>

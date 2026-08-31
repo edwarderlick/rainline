@@ -72,12 +72,14 @@ class Rainline(gl.Contract):
     credits: TreeMap[Address, u256]
     next_cover_id: u256
     cover_list: DynArray[str]
+    withdrawing: bool
 
     def __init__(self):
         self.operator = gl.message.sender_address
         self.pool_balance = u256(0)
         self.reserved_payout = u256(0)
         self.next_cover_id = u256(1)
+        self.withdrawing = False
 
     def _now(self) -> datetime:
         try:
@@ -196,10 +198,11 @@ class Rainline(gl.Contract):
         if available + premium < payout:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} pool cannot reserve payout")
 
-        cover_id = f"cover-{self.next_cover_id}"
+        self.next_cover_id = self.next_cover_id + u256(1)
+        hash_input = f"{gl.message.sender_address}-{now}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{self.next_cover_id}"
+        cover_id = "cover-" + hashlib.md5(hash_input.encode("utf-8")).hexdigest()
         if cover_id in self.covers:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} ID collision: {cover_id} already exists")
-        self.next_cover_id = self.next_cover_id + u256(1)
         self.cover_list.append(cover_id)
 
         self.pool_balance = self.pool_balance + premium
@@ -238,10 +241,10 @@ class Rainline(gl.Contract):
         if now >= self._parse_date(cover.coverage_date):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} cancel window closed once coverage day starts")
 
-        cover.state = "CANCELED"
+        cover.state = "REFUNDED"
         cover.result_json = json.dumps(
             {
-                "status": "CANCELED",
+                "status": "REFUNDED",
                 "reason": "Buyer canceled before the coverage day. Premium refunded.",
             }
         )
@@ -412,10 +415,16 @@ Do not invent a value if the field is missing or null.
 
     @gl.public.write
     def withdraw(self) -> None:
+        if getattr(self, "withdrawing", False):
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} Re-entrancy detected")
+        self.withdrawing = True
+        
         caller = gl.message.sender_address
         amount = self.credits.get(caller, u256(0))
         if amount == u256(0):
+            self.withdrawing = False
             raise gl.vm.UserError(f"{ERROR_EXPECTED} no credit")
+        
         self.credits[caller] = u256(0)
         
         success = False
@@ -428,7 +437,10 @@ Do not invent a value if the field is missing or null.
             
         if not success:
             self.credits[caller] = amount
-            raise gl.vm.UserError(f"{ERROR_EXPECTED} native transfer failed")
+            self.withdrawing = False
+            raise gl.vm.UserError("StudioNet native transfer failed. Fallback to Credits initiated.")
+            
+        self.withdrawing = False
 
     @gl.public.write
     def withdraw_unreserved(self, amount_wei: int) -> None:

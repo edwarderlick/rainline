@@ -14,7 +14,7 @@ export const STUDIONET_NAME = "GenLayer StudioNet";
 
 export type CoverState =
   | "OPEN"
-  | "CANCELED"
+  | "REFUNDED"
   | "RESOLVED_PAY"
   | "RESOLVED_KEEP"
   | "INSUFFICIENT";

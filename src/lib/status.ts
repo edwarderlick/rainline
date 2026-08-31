@@ -12,13 +12,13 @@ export function weatherForCover(
 
 /** Paid copy is allowed only after a settlement that moved premium or payout. */
 export function canMarkPaid(state: CoverState): boolean {
-  return state === "RESOLVED_PAY" || state === "INSUFFICIENT" || state === "CANCELED";
+  return state === "RESOLVED_PAY" || state === "INSUFFICIENT" || state === "REFUNDED";
 }
 
 export function paidReason(state: CoverState): string | null {
   if (state === "RESOLVED_PAY") return "Payout sent or credited";
   if (state === "INSUFFICIENT") return "Premium refunded";
-  if (state === "CANCELED") return "Premium refunded";
+  if (state === "REFUNDED") return "Premium refunded";
   return null;
 }
 

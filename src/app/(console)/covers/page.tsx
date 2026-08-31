@@ -190,7 +190,7 @@ export default function CoversPage() {
       )}
       <p className="mt-6 font-mono text-[12px] text-on-surface-variant">
         Templates: {TEMPLATES.map((t) => t.id).join(", ")}. No
-        custom text. Paid is shown only on RESOLVED_PAY, INSUFFICIENT, or CANCELED.
+        custom text. Paid is shown only on RESOLVED_PAY, INSUFFICIENT, or REFUNDED.
       </p>
     </div>
   );

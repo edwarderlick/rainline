@@ -139,7 +139,7 @@ export default function HowItWorksPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between border border-outline/50 bg-surface p-3">
-                <span className="font-mono text-[12px]">CANCELED</span>
+                <span className="font-mono text-[12px]">REFUNDED</span>
                 <span className="bg-tertiary px-2 py-1 font-mono text-[10px] font-bold text-on-tertiary">
                   Refund
                 </span>

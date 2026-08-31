@@ -182,9 +182,42 @@ export default function BuyPage() {
             </button>
           ))}
         </div>
-        <p className="font-mono text-[12px] text-on-surface-variant">
-          {city.lat}°, {city.lon}°
-        </p>
+        <div className="flex flex-col gap-4 border-t border-outline pt-4">
+          <div className="flex items-center justify-between border border-outline bg-surface p-3">
+            <span className="font-mono text-[12px] font-bold uppercase text-primary">
+              {city.name === "Manual Coordinates" ? "Manual Coordinates" : city.name}
+            </span>
+            <span className="font-mono text-[12px] text-on-surface-variant">
+              {city.lat}°, {city.lon}°
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block">
+              <span className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-outline">
+                Latitude
+              </span>
+              <input
+                value={city.lat}
+                onChange={(e) =>
+                  setCity({ name: "Manual Coordinates", lat: e.target.value, lon: city.lon })
+                }
+                className="w-full border border-outline bg-surface p-2 font-mono text-[12px]"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-outline">
+                Longitude
+              </span>
+              <input
+                value={city.lon}
+                onChange={(e) =>
+                  setCity({ name: "Manual Coordinates", lat: city.lat, lon: e.target.value })
+                }
+                className="w-full border border-outline bg-surface p-2 font-mono text-[12px]"
+              />
+            </label>
+          </div>
+        </div>
       </div>
 
       <div className="relative z-10 space-y-6 border border-outline bg-surface-container-low p-4">

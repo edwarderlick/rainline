@@ -45,7 +45,7 @@ export function observedDisplay(cover: {
   template: "RAIN" | "DRY" | "HEAT";
 }): string {
   if (cover.state === "INSUFFICIENT") return "null";
-  if (cover.state === "OPEN" || cover.state === "CANCELED" || cover.observed_milli === "") {
+  if (cover.state === "OPEN" || cover.state === "REFUNDED" || cover.observed_milli === "") {
     return "--";
   }
   const n = Number(cover.observed_milli);
