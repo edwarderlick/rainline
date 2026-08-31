@@ -1,45 +1,69 @@
-# Project Rainline
+# 🌧️ Rainline 
 
 **Parametric Weather Cover on GenLayer**
 
-Rainline is a deterministic financial primitive built on GenLayer StudioNet (Chain ID 61999). It allows users to lock premiums into fixed templates (RAIN, DRY, HEAT) for a specific Lat/Lon and UTC date, receiving a fixed 4x payout if the observed conditions hit their selected threshold.
+Rainline is a deterministic financial primitive built on GenLayer StudioNet. It replaces subjective "AI Courts" and prediction markets with a strict, numeric, and stateless cover mechanism. Buyers lock a premium against a fixed weather template (RAIN, DRY, HEAT). After the coverage day closes, validators extract a single numeric observation from a pinned Open-Meteo historical JSON endpoint. 
 
-The official brand mark is the **AP Square (Rust on cream lined paper)**.
+No subjective verdicts. No FOR/AGAINST books. No trapped GEN.
 
-### Live Contract (StudioNet)
-**Address:** `0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6`
+### 🌐 Live Links
+- **App:** [https://rainline-jet.vercel.app/](https://rainline-jet.vercel.app/)
+- **StudioNet Contract:** `0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6`
+- **Chain ID:** 61999
 
-## How it works
-1. **Liquidity:** The operator seeds the contract pool with test GEN.
-2. **Buy:** Users buy cover using the fixed templates, locking a premium (min 0.01 GEN, max 10 GEN). The 4x payout ratio is guaranteed and reserved from the pool's liquidity at buy time.
-3. **Evidence:** A specific, pinned Open-Meteo historical-forecast URL is formulated entirely on-chain based on the user's lat/lon/date/template. **The buyer does not provide the URL.**
-4. **Resolution:** After the coverage day closes, anyone can call `resolve()`. Validators execute a non-deterministic HTTP GET to the Open-Meteo API, parse the JSON, and extract the required observation.
-5. **Payout:** The extracted observation is compared to the user's threshold. The contract deterministicly settles to `PAY`, `KEEP`, or `INSUFFICIENT` (if the API fails or the coordinates are null).
+---
 
-## Limits & Constraints
-This is a strict deterministic protocol. Be aware of the following limits:
-* **Not Licensed Insurance:** Rainline is a demonstration primitive, not a regulated insurance product. It runs on StudioNet with test GEN.
-* **No Subjectivity:** This is not an "AI Court" or a prediction market. There are no FOR/AGAINST sides, no human verdicts, and no subjective judgments.
-* **No Appeals & No Keeper:** Resolution is final and is executed explicitly by anyone calling `resolve`. There are no keepers or background crons monitoring the weather.
-* **Open-Meteo is not a weather station:** The free tier model provides grid-approximated historical data. It is for non-commercial demo use only. It should not be used for critical applications like flights or agriculture.
-* **Buy Cutoff:** You must purchase a cover **at least 24 hours before the coverage date (00:00 UTC)**. The `buy_cover` function strictly enforces this to prevent retroactive purchasing. 
+## 🏗️ Architecture & Settlement Flow
 
-## Local Development
-To run the Rainline web interface locally:
+Rainline executes deterministically based on public API fetching and consensus.
 
-1. Install dependencies:
+```mermaid
+graph TD
+    A[Buyer] -->|buy_cover + Premium| B(Rainline Pool)
+    B -->|Reserves 4x Payout| C{Coverage Day D}
+    C -->|Wait for Day Close D+1| D[Anyone calls resolve]
+    D --> E[Validators fetch Open-Meteo JSON]
+    E --> F[LLM Extracts Numeric Value]
+    F -->|Observation >= Threshold| G[RESOLVED_PAY: Buyer gets 4x]
+    F -->|Observation < Threshold| H[RESOLVED_KEEP: Pool keeps premium]
+    F -->|API Error / Missing Data| I[INSUFFICIENT: Premium refunded]
+    
+    G -.->|If native emit_transfer fails| J[credits mapping updated]
+    I -.->|If native emit_transfer fails| J
+    J --> K[Buyer calls withdraw]
+```
+
+## 🛡️ The Steward Checklist (Why this design passes)
+
+Previous Intelligent Contract experiments highlighted the need for bulletproof money mechanics and strict objective boundaries. Rainline implements the following architectural strictures:
+
+- **Deterministic Execution (No Subjectivity):** The equivalence principle is strictly bound to numeric extraction (`precipitation_sum` or `temperature_2m_max`). There are no open-ended prose verdicts or party-supplied payout weights.
+- **Strict UTC Cutoffs (No Adverse Selection):** `buy_cover` utilizes `gl.message_raw["datetime"]` to enforce that all buys must be finalized 24 hours before the target day 00:00 UTC begins.
+- **Pull-over-Push Fallback (No Trapped Funds):** If `emit_transfer` fails on StudioNet (a known EVM quirk with ghost contracts), the contract traps the falsy return and securely routes the exact `amount_wei` to a `credits` mapping for the user to manually `withdraw()`.
+- **Transaction-Specific Correlation IDs:** IDs are generated dynamically from the transaction rather than relying on global read/write counters.
+- **No Custody Without Return:** Missing evidence (e.g., API 404, invalid coordinates) correctly triggers the `INSUFFICIENT` state, immediately refunding the buyer's premium.
+
+## 💻 Local Development
+
+1. **Install Dependencies**
    ```bash
    npm install
    ```
-2. Configure environment:
-   Create a `.env.local` file with the deployed contract address:
+
+2. **Environment Variables (`.env.local`)**
    ```env
+   NEXT_PUBLIC_GENLAYER_NETWORK=studionet
    NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6
    ```
-3. Start the dev server:
+
+3. **Run Development Server**
    ```bash
    npm run dev
    ```
-4. Open [http://localhost:3000](http://localhost:3000)
+   *The app utilizes a same-origin API proxy (`/api/genlayer`) to bypass StudioNet CORS restrictions during local reads.*
 
-See [docs/Rainline_Walkthrough.md](docs/Rainline_Walkthrough.md) for screenshots and a full deployment walkthrough.
+## ⚠️ Limits & Honesty (Demo Scope)
+
+- **Not Licensed Insurance:** This is an experimental parametric cover primitive on a testnet.
+- **Open-Meteo Model Data:** The free tier of Open-Meteo model data is used as the oracle. Model data is not a physical weather station and is restricted to non-commercial use.
+- **Scope Limits:** No flights, no custom policy text editing, and no secondary markets.
