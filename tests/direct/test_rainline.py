@@ -52,17 +52,28 @@ def test_buy_validations(direct_vm, deployed, direct_alice):
         deployed.buy_cover("FLIGHT", "19.076", "72.8777", "2026-09-10", 25000)
 
 
-def test_concurrent_buys_return_distinct_ids(direct_vm, deployed, direct_alice, direct_bob):
-    ids = []
-    for i, who in enumerate([direct_alice, direct_bob, direct_alice, direct_bob, direct_alice]):
-        direct_vm.sender = who
-        direct_vm.value = 10**18
-        cover_id = deployed.buy_cover("RAIN", "19.07", "72.88", f"2026-10-0{i+1}", 25000)
-        ids.append(cover_id)
+def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, direct_alice):
+    direct_vm.sender = direct_alice
+    direct_vm.value = 10**18
+    
+    import concurrent.futures
+    from gltest.direct.wasi_mock import _local
+    
+    def buy(i):
+        _local.vm = direct_vm
+        return deployed.buy_cover("RAIN", f"19.0{i}", "72.88", f"2026-10-0{i+1}", 25000)
+        
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+        futures = [ex.submit(buy, i) for i in range(5)]
+        ids = [f.result() for f in futures]
+        
     assert len(set(ids)) == 5
-    for cid in ids:
+    for i, cid in enumerate(ids):
+        assert cid is not None
         assert cid.startswith("cover-")
-        assert len(cid) > 10
+        cover = deployed.get_cover(cid)
+        assert cover["lat"] == f"19.0{i}00"
+        assert cover["coverage_date"] == f"2026-10-0{i+1}"
 
 
 def test_late_buy_reverts(direct_vm, deployed, direct_alice):
@@ -101,18 +112,24 @@ def test_resolve_pay_from_storage_not_cache(direct_vm, deployed, direct_alice):
     deployed.resolve(cover_id)
     deployed._instance._now = real_now
     cover = deployed.get_cover(cover_id)
-    assert cover["state"] in ("RESOLVED_PAY", "INSUFFICIENT")
-    if cover["state"] == "RESOLVED_PAY":
-        assert cover["result"]["amount_wei"] == str(4 * 10**18)
-        assert cover["result"]["status"] == "PAY"
+    assert cover["state"] == "RESOLVED_PAY"
+    assert cover["result"]["amount_wei"] == str(4 * 10**18)
+    assert cover["result"]["status"] == "PAY"
 
 
 def test_missing_json_insufficient_refunds(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
+    initial_credit = deployed.get_credit(direct_alice)
+    
     real_now = deployed._instance._now
     deployed._instance._now = lambda: datetime(2026, 8, 10, tzinfo=timezone.utc)
     cover_id = deployed.buy_cover("RAIN", "19.0760", "72.8777", "2026-08-19", 25000)
+    
+    # We purposefully don't mock any native transfer to pass, so it fails and goes to credits
+    # But wait, direct_vm in genlayer-test MIGHT NOT simulate native transfer failures unless we mock it.
+    # Actually, in test environment, cross-contract calls are not implemented or fail by default, so it always goes to credits!
+    
     mock_meteo(direct_vm, "19.0760", "72.8777", "2026-08-19", "precipitation_sum", None)
     deployed._instance._now = lambda: datetime(2026, 8, 25, tzinfo=timezone.utc)
     deployed.resolve(cover_id)
@@ -121,6 +138,9 @@ def test_missing_json_insufficient_refunds(direct_vm, deployed, direct_alice):
     assert cover["state"] == "INSUFFICIENT"
     assert cover["result"]["status"] == "INSUFFICIENT"
     assert cover["result"]["amount_wei"] == str(10**18)
+    
+    final_credit = deployed.get_credit(direct_alice)
+    assert final_credit == initial_credit + 10**18
 
 
 def test_keep_does_not_pay_buyer(direct_vm, deployed, direct_alice):
@@ -128,14 +148,33 @@ def test_keep_does_not_pay_buyer(direct_vm, deployed, direct_alice):
     direct_vm.value = 10**18
     real_now = deployed._instance._now
     deployed._instance._now = lambda: datetime(2026, 8, 10, tzinfo=timezone.utc)
+    pool_before = deployed.get_pool()
     cover_id = deployed.buy_cover("RAIN", "40.7128", "-74.0060", "2026-08-18", 50000)
     mock_meteo(direct_vm, "40.7128", "-74.0060", "2026-08-18", "precipitation_sum", 1.0)
     deployed._instance._now = lambda: datetime(2026, 8, 25, tzinfo=timezone.utc)
     deployed.resolve(cover_id)
     deployed._instance._now = real_now
     cover = deployed.get_cover(cover_id)
-    if cover["state"] == "RESOLVED_KEEP":
-        assert cover["result"]["amount_wei"] == "0"
+    assert cover["state"] == "RESOLVED_KEEP"
+    assert cover["result"]["amount_wei"] == "0"
+    
+    pool_after = deployed.get_pool()
+    # The pool balance should be exactly pool_before["pool_balance"] + premium
+    assert pool_after["pool_balance"] == pool_before["pool_balance"] + 10**18
+
+def test_resolve_reverts_before_day_closed(direct_vm, deployed, direct_alice):
+    direct_vm.sender = direct_alice
+    direct_vm.value = 10**18
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 8, 10, tzinfo=timezone.utc)
+    cover_id = deployed.buy_cover("RAIN", "40.7128", "-74.0060", "2026-08-18", 50000)
+    
+    # Try resolving before coverage date has fully closed (e.g. at 23:59 UTC on coverage day)
+    deployed._instance._now = lambda: datetime(2026, 8, 18, 23, 59, 59, tzinfo=timezone.utc)
+    with pytest.raises(Exception, match="resolve only after the coverage day has closed"):
+        deployed.resolve(cover_id)
+        
+    deployed._instance._now = real_now
 
 
 def test_operator_cannot_drain_reserved(direct_vm, deployed, direct_alice):
