@@ -38,7 +38,7 @@ export default function BuyPage() {
   const router = useRouter();
   const wallet = useWallet();
   const [template, setTemplate] = useState<(typeof TEMPLATES)[number]["id"]>("RAIN");
-  const [city, setCity] = useState<(typeof CITIES)[number]>(CITIES[0]);
+  const [city, setCity] = useState<{ name: string; lat: string; lon: string }>(CITIES[0]);
   const [date, setDate] = useState(defaultDate);
   const [threshold, setThreshold] = useState("25");
   const [premium, setPremium] = useState("1");
