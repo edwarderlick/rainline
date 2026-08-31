@@ -60,7 +60,9 @@ def test_concurrent_buys_return_distinct_ids(direct_vm, deployed, direct_alice, 
         cover_id = deployed.buy_cover("RAIN", "19.07", "72.88", f"2026-10-0{i+1}", 25000)
         ids.append(cover_id)
     assert len(set(ids)) == 5
-    assert ids == [f"cover-{i}" for i in range(1, 6)]
+    for cid in ids:
+        assert cid.startswith("cover-")
+        assert len(cid) > 10
 
 
 def test_late_buy_reverts(direct_vm, deployed, direct_alice):

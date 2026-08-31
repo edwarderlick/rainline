@@ -135,13 +135,7 @@ export async function readCover(id: string): Promise<Cover | null> {
 }
 
 export async function readCoverIds(): Promise<string[]> {
-  if (!hasContract()) return [];
-  const raw = await readClient().readContract({
-    address: contractAddress(),
-    functionName: "list_cover_ids",
-    args: [],
-  });
-  return Array.isArray(raw) ? raw.map(String) : [];
+  return []; // list_cover_ids removed from contract to eliminate global state contention
 }
 
 export async function readPool(): Promise<Pool | null> {
@@ -257,27 +251,13 @@ export async function writeBuyCover(
   thresholdMilli: number,
   value: bigint
 ): Promise<WriteReceipt> {
-  const before = new Set(await readCoverIds());
-  const receipt = await sendWrite(
+  return sendWrite(
     account,
     "buy_cover",
     [template, lat, lon, coverageDate, thresholdMilli],
     value,
     TransactionStatus.ACCEPTED
   );
-  if (receipt.coverId) return receipt;
-  const after = await readCoverIds();
-  const created = after.filter((id) => !before.has(id));
-  if (created.length === 1) return { ...receipt, coverId: created[0] };
-  if (account) {
-    for (const id of [...after].reverse()) {
-      const cover = await readCover(id);
-      if (cover && cover.buyer.toLowerCase() === account.toLowerCase() && !before.has(id)) {
-        return { ...receipt, coverId: id };
-      }
-    }
-  }
-  return receipt;
 }
 
 export async function writeCancelCover(account: string | null, coverId: string): Promise<WriteReceipt> {

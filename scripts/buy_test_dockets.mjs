@@ -9,12 +9,13 @@
  * Resolution will be possible after D+1 00:00 UTC.
  */
 
+import "dotenv/config";
 import { createClient, createAccount } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 
 const RPC = "https://studio.genlayer.com/api";
-const CONTRACT = "0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6";
-const OPERATOR_KEY = "0xa28085456990018deb66e4745e932f1c3f387c3926ac5a2d636982b6f8e042ac";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6";
+const OPERATOR_KEY = process.env.OPERATOR_PRIVATE_KEY;
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
 
 const chain = {

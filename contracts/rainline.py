@@ -2,6 +2,7 @@
 
 import json
 import re
+import hashlib
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from genlayer import *
@@ -64,26 +65,22 @@ class Cover:
 
 
 class Rainline(gl.Contract):
-    next_cover_id: u256
     operator: Address
     pool_balance: u256
     reserved_payout: u256
     covers: TreeMap[str, Cover]
     credits: TreeMap[Address, u256]
-    cover_ids: DynArray[str]
 
     def __init__(self):
-        self.next_cover_id = u256(1)
         self.operator = gl.message.sender_address
         self.pool_balance = u256(0)
         self.reserved_payout = u256(0)
 
     def _now(self) -> datetime:
-        raw = ""
         try:
             raw = str(gl.message_raw["datetime"])
         except Exception:
-            raw = datetime.now(timezone.utc).isoformat()
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} missing datetime in message context")
         text = raw.strip()
         if text.endswith("Z"):
             text = text[:-1] + "+00:00"
@@ -196,8 +193,8 @@ class Rainline(gl.Contract):
         if available + premium < payout:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} pool cannot reserve payout")
 
-        cover_id = f"cover-{self.next_cover_id}"
-        self.next_cover_id = self.next_cover_id + u256(1)
+        raw_id = f"{gl.message.sender_address}-{gl.message_raw.get('datetime', '')}-{template}-{lat_s}-{lon_s}-{coverage_date}"
+        cover_id = "cover-" + hashlib.md5(raw_id.encode()).hexdigest()[:12]
 
         self.pool_balance = self.pool_balance + premium
         self.reserved_payout = self.reserved_payout + payout
@@ -219,7 +216,6 @@ class Rainline(gl.Contract):
             observed_milli="",
             created_at=str(gl.message_raw.get("datetime", "")),
         )
-        self.cover_ids.append(cover_id)
         CoverCreated(cover_id, template, premium).emit()
         return cover_id
 
@@ -246,8 +242,8 @@ class Rainline(gl.Contract):
         self.covers[cover_id] = cover
         self.pool_balance = self.pool_balance - cover.premium
         self.reserved_payout = self.reserved_payout - cover.payout
-        self._pay(cover.buyer, cover.premium)
         CoverCanceled(cover_id).emit()
+        self._pay(cover.buyer, cover.premium)
 
     @gl.public.write
     def resolve(self, cover_id: str) -> None:
@@ -348,17 +344,13 @@ Do not invent a value if the field is missing or null.
             return json.dumps(
                 {
                     "observed_milli": observed,
-                    "reason": reason,
                     "status": status,
                 },
                 sort_keys=True,
                 separators=(",", ":"),
             )
 
-        raw = gl.eq_principle.prompt_comparative(
-            fetch_and_extract,
-            principle="`status` and `observed_milli` must be exactly the same. `reason` may differ.",
-        )
+        raw = gl.eq_principle.strict_eq(fetch_and_extract)
         if isinstance(raw, str):
             result = json.loads(raw)
         else:
@@ -404,13 +396,13 @@ Do not invent a value if the field is missing or null.
         
         # 2. Write to Storage
         self.covers[cover_id] = cover
+        CoverResolved(cover_id, status).emit()
         
         # 3. Interactions (External Calls)
         if status == "PAY":
             self._pay(cover.buyer, cover.payout)
         elif status == "INSUFFICIENT":
             self._pay(cover.buyer, cover.premium)
-        CoverResolved(cover_id, status).emit()
 
     @gl.public.write
     def withdraw(self) -> None:
@@ -471,9 +463,6 @@ Do not invent a value if the field is missing or null.
             "created_at": cover.created_at,
         }
 
-    @gl.public.view
-    def list_cover_ids(self) -> list:
-        return list(self.cover_ids)
 
     @gl.public.view
     def get_pool(self) -> dict:
