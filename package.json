@@ -1,0 +1,30 @@
+{
+  "name": "rainline",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test:logic": "python -m pytest tests/unit -v"
+  },
+  "dependencies": {
+    "@walletconnect/ethereum-provider": "^2.23.10",
+    "genlayer-js": "^1.1.8",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.1",
+    "puppeteer": "^25.9.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,124 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-secondary-container":"#3b6c5a","surface-tint":"#b22c00","on-primary-fixed":"#3c0800","on-tertiary-fixed":"#1c1c13","on-primary-container":"#fffbff","error":"#ba1a1a","surface-container-low":"#f6f3f2","on-surface":"#1c1b1b","primary-container":"#d53d0f","surface-container":"#f0eded","tertiary-fixed-dim":"#c9c7b8","surface-container-high":"#eae7e7","surface-container-lowest":"#ffffff","inverse-primary":"#ffb5a1","on-tertiary-container":"#ffffd8","on-background":"#1c1b1b","on-tertiary-fixed-variant":"#47473c","on-secondary-fixed-variant":"#1d4f3e","secondary-fixed-dim":"#9ed1bb","background":"#fcf9f8","outline-variant":"#e4beb5","primary":"#ae2a00","surface-variant":"#e5e2e1","on-secondary":"#ffffff","surface-dim":"#dcd9d9","on-primary-fixed-variant":"#881f00","inverse-on-surface":"#f3f0ef","error-container":"#ffdad6","tertiary":"#5d5d51","primary-fixed":"#ffdbd1","inverse-surface":"#313030","on-error":"#ffffff","primary-fixed-dim":"#ffb5a1","secondary-fixed":"#baeed7","on-primary":"#ffffff","outline":"#8f7068","surface":"#fcf9f8","tertiary-fixed":"#e5e3d4","secondary":"#376755","secondary-container":"#b7ebd4","on-error-container":"#93000a","on-tertiary":"#ffffff","on-surface-variant":"#5b403a","tertiary-container":"#767569","on-secondary-fixed":"#002116","surface-bright":"#fcf9f8","surface-container-highest":"#e5e2e1"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"16px","base-unit":"4px","margin-mobile":"16px","container-max":"1280px","margin-desktop":"40px"},"fontFamily":{"body-md":["Hanken Grotesk"],"headline-lg":["Hanken Grotesk"],"label-status":["JetBrains Mono"],"headline-lg-mobile":["Hanken Grotesk"],"body-lg":["Hanken Grotesk"],"headline-md":["Hanken Grotesk"],"label-technical":["JetBrains Mono"],"display-xl":["Hanken Grotesk"]},"fontSize":{"body-md":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-lg":["48px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-status":["10px",{"lineHeight":"12px","fontWeight":"700"}],"headline-lg-mobile":["32px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"28px","fontWeight":"600"}],"label-technical":["12px",{"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"500"}],"display-xl":["80px",{"lineHeight":"72px","letterSpacing":"-0.04em","fontWeight":"800"}]}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-background flex items-center justify-center min-h-screen"><main class="w-full"><div class="flex flex-col w-full text-on-background bg-background font-body-md">
+<div class="w-full flex justify-center py-margin-desktop">
+<div class="max-w-container-max w-full px-margin-mobile md:px-gutter grid grid-cols-12 gap-0 border border-outline/30">
+<!-- Header Section -->
+<div class="col-span-12 border-b border-outline/30 bg-surface-container-lowest p-margin-desktop">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-technical text-label-technical text-tertiary uppercase tracking-widest">[01] SYSTEM_PROTOCOL</span>
+<span class="font-label-status text-label-status bg-primary-container text-on-primary-container px-2 py-1 uppercase border border-primary-container">Live</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg md:text-display-xl md:font-display-xl text-on-surface mb-2">How Cover Works</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">A deterministic, automated protocol for risk management and dispute resolution. Execute contracts with mathematical certainty.</p>
+</div>
+<!-- Main Protocol Flow -->
+<div class="col-span-12 md:col-span-8 border-r md:border-b-0 border-b border-outline/30">
+<!-- Step 1 & 2 Row -->
+<div class="grid grid-cols-1 md:grid-cols-2">
+<!-- Step 1 -->
+<div class="p-gutter border-b md:border-r border-outline/30 hover:bg-surface-container-low transition-colors duration-300">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-primary">01</span>
+<span class="material-symbols-outlined text-primary" style="font-size: 16px;">account_balance_wallet</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Initialize Funding</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Capital is locked into the smart contract escrow. This ensures immediate liquidity is available upon resolution.</p>
+<div class="border border-outline/50 p-2 bg-surface">
+<span class="font-label-technical text-label-technical text-tertiary">STATUS: AWAITING_DEPOSIT</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="p-gutter border-b border-outline/30 hover:bg-surface-container-low transition-colors duration-300">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-primary">02</span>
+<span class="material-symbols-outlined text-primary" style="font-size: 16px;">ads_click</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Parameter Selection</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">Select the specific event metrics and trigger conditions. The protocol operates strictly on these predefined parameters.</p>
+<div class="border border-outline/50 p-2 bg-surface flex justify-between">
+<span class="font-label-technical text-label-technical text-tertiary">VAR_1: ACTIVE</span>
+<span class="font-label-technical text-label-technical text-tertiary">VAR_2: PENDING</span>
+</div>
+</div>
+</div>
+<!-- Step 3 (Full Width) -->
+<div class="p-gutter border-b border-outline/30 bg-surface-container-lowest">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-error">03</span>
+<span class="material-symbols-outlined text-error" style="font-size: 16px;">gavel</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Buy Refusal Logic</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">If conditions are not met prior to the active window, the contract execution is halted. Funds are held pending further instruction or timeout.</p>
+<!-- Decorative Logic Diagram -->
+<div class="mt-6 border border-outline/30 p-4 bg-surface flex flex-col space-y-2">
+<div class="flex items-center space-x-4">
+<div class="w-16 h-8 border border-outline flex items-center justify-center font-label-technical text-label-technical">COND</div>
+<div class="flex-1 h-px bg-outline/50 relative">
+<span class="absolute right-0 top-1/2 -translate-y-1/2 -mt-[5px] material-symbols-outlined" style="font-size: 10px;">arrow_forward_ios</span>
+</div>
+<div class="w-24 h-8 border border-error bg-error-container text-on-error-container flex items-center justify-center font-label-technical text-label-technical">HALT EXEC</div>
+</div>
+</div>
+</div>
+<!-- Step 4 & 5 Row -->
+<div class="grid grid-cols-1 md:grid-cols-2">
+<!-- Step 4 -->
+<div class="p-gutter border-b md:border-b-0 md:border-r border-outline/30 hover:bg-surface-container-low transition-colors duration-300">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-primary">04</span>
+<span class="material-symbols-outlined text-primary" style="font-size: 16px;">schedule</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Resolution Timing</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">The contract operates on a strict timeline. T+0 denotes the event conclusion, triggering the automated evaluation phase.</p>
+</div>
+<!-- Step 5 -->
+<div class="p-gutter hover:bg-surface-container-low transition-colors duration-300">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-primary">05</span>
+<span class="material-symbols-outlined text-primary" style="font-size: 16px;">sync</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Validator Fetch</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Decentralized oracles fetch the real-world outcome data. Multiple sources are aggregated to ensure verifiable accuracy.</p>
+</div>
+</div>
+</div>
+<!-- Sidebar / Final Step -->
+<div class="col-span-12 md:col-span-4 bg-surface-container flex flex-col justify-between">
+<div class="p-gutter border-b border-outline/30">
+<div class="flex items-center space-x-2 mb-4">
+<span class="font-label-technical text-label-technical text-secondary">06</span>
+<span class="material-symbols-outlined text-secondary" style="font-size: 16px;">price_check</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Payout / Refund</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Based on the validator data, the contract automatically executes the final state. Funds are either routed to the beneficiary or returned to the origin.</p>
+<div class="space-y-4">
+<div class="border border-secondary bg-secondary/10 p-3 flex justify-between items-center">
+<span class="font-label-technical text-label-technical text-on-surface">OUTCOME: TRUE</span>
+<span class="font-label-status text-label-status bg-secondary text-on-secondary px-2 py-1">PAYOUT</span>
+</div>
+<div class="border border-outline/50 bg-surface p-3 flex justify-between items-center">
+<span class="font-label-technical text-label-technical text-on-surface">OUTCOME: FALSE</span>
+<span class="font-label-status text-label-status bg-surface-variant text-on-surface-variant px-2 py-1 border border-outline/50">REFUND</span>
+</div>
+</div>
+</div>
+<!-- Immutable Guarantee -->
+<div class="p-gutter bg-surface-container-high relative overflow-hidden group">
+<!-- Subtle ambient animation -->
+<div class="absolute inset-0 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity duration-1000">
+<svg class="w-full h-full animate-spin-slow" style="animation-duration: 60s;" viewbox="0 0 100 100">
+<path d="M0,50 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0" fill="none" stroke="currentColor" stroke-dasharray="2 4" stroke-width="0.5"></path>
+</svg>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2 relative z-10 flex items-center">
+<span class="material-symbols-outlined mr-2" style="font-variation-settings: 'FILL' 1;">gpp_bad</span>
+             Strict Finality
+           </h4>
+<p class="font-body-lg text-body-lg text-on-surface-variant relative z-10 font-bold">ZERO APPEALS.</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 relative z-10">The protocol's decision is absolute. Once the validators confirm the state, execution is irreversible. This guarantees system integrity and eliminates bureaucratic latency.</p>
+</div>
+</div>
+</div>
+</div>
+</div></main></body></html>
