@@ -1,9 +1,10 @@
+import "dotenv/config";
 import { createClient, createAccount } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 
 const RPC = "https://studio.genlayer.com/api";
-const CONTRACT = "0x1f782Fbd21Da3f786A97C556faA72a6627b07e51"; // from the last run
-const BUYER = "0x2Bd0F2e2e307D2042CCEc4174C026676A09fa946";   // from the last run
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS;
+const BUYER = createAccount(process.env.OPERATOR_PRIVATE_KEY).address;
 
 const chain = {
   ...studionet,

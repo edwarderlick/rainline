@@ -135,7 +135,18 @@ export async function readCover(id: string): Promise<Cover | null> {
 }
 
 export async function readCoverIds(): Promise<string[]> {
-  return []; // list_cover_ids removed from contract to eliminate global state contention
+  if (!hasContract()) return [];
+  try {
+    const raw = await readClient().readContract({
+      address: contractAddress(),
+      functionName: "list_cover_ids",
+      args: [],
+    });
+    if (Array.isArray(raw)) return raw.map(String);
+    return [];
+  } catch {
+    return [];
+  }
 }
 
 export async function readPool(): Promise<Pool | null> {

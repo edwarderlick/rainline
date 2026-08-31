@@ -70,11 +70,14 @@ class Rainline(gl.Contract):
     reserved_payout: u256
     covers: TreeMap[str, Cover]
     credits: TreeMap[Address, u256]
+    next_cover_id: u256
+    cover_list: DynArray[str]
 
     def __init__(self):
         self.operator = gl.message.sender_address
         self.pool_balance = u256(0)
         self.reserved_payout = u256(0)
+        self.next_cover_id = u256(1)
 
     def _now(self) -> datetime:
         try:
@@ -193,8 +196,11 @@ class Rainline(gl.Contract):
         if available + premium < payout:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} pool cannot reserve payout")
 
-        raw_id = f"{gl.message.sender_address}-{gl.message_raw.get('datetime', '')}-{template}-{lat_s}-{lon_s}-{coverage_date}"
-        cover_id = "cover-" + hashlib.md5(raw_id.encode()).hexdigest()[:12]
+        cover_id = f"cover-{self.next_cover_id}"
+        if cover_id in self.covers:
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} ID collision: {cover_id} already exists")
+        self.next_cover_id = self.next_cover_id + u256(1)
+        self.cover_list.append(cover_id)
 
         self.pool_balance = self.pool_balance + premium
         self.reserved_payout = self.reserved_payout + payout
@@ -492,3 +498,7 @@ Do not invent a value if the field is missing or null.
             coverage_date,
             template,
         )
+
+    @gl.public.view
+    def list_cover_ids(self) -> list:
+        return self.cover_list

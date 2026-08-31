@@ -40,7 +40,7 @@ Previous Intelligent Contract experiments highlighted the need for bulletproof m
 - **Deterministic Execution (No Subjectivity):** The equivalence principle is strictly bound to numeric extraction (`precipitation_sum` or `temperature_2m_max`). There are no open-ended prose verdicts or party-supplied payout weights.
 - **Strict UTC Cutoffs (No Adverse Selection):** `buy_cover` utilizes `gl.message_raw["datetime"]` to enforce that all buys must be finalized 24 hours before the target day 00:00 UTC begins.
 - **Pull-over-Push Fallback (No Trapped Funds):** If `emit_transfer` fails on StudioNet (a known EVM quirk with ghost contracts), the contract traps the falsy return and securely routes the exact `amount_wei` to a `credits` mapping for the user to manually `withdraw()`.
-- **No Global State Contention:** Correlation IDs are derived from deterministic hashes of the sender address, datetime, and constraints.
+- **ID Custody & Retrieval:** An append-only registry is used for listing, but correlation IDs are securely returned directly from the transaction receipt, avoiding read-after-write guessing.
 - **No Custody Without Return:** Missing evidence (e.g., API 404, invalid coordinates) correctly triggers the `INSUFFICIENT` state, immediately refunding the buyer's premium.
 
 ## 💻 Local Development
