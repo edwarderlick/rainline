@@ -52,7 +52,7 @@ Because the contract strictly enforces that covers must be bought at least 24 ho
 ## Screenshots
 
 > **Please insert a clear screenshot showing a successful UI buy transaction hash on StudioNet here:**
-> ![Successful UI Buy](C:/Users/samir/.gemini/antigravity-ide/brain/14fe8aa3-da0e-4e15-bc5e-50b616d2fec3/successful_buy.png)
+> ![Successful UI Buy](assets/successful_buy.png)
 
 > **Please insert a clear screenshot showing a successful UI cancel transaction hash on StudioNet here:**
-> ![Successful UI Cancel](C:/Users/samir/.gemini/antigravity-ide/brain/14fe8aa3-da0e-4e15-bc5e-50b616d2fec3/successful_cancel.png)
+> ![Successful UI Cancel](assets/successful_cancel.png)

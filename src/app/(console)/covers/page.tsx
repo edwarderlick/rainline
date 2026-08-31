@@ -5,7 +5,7 @@ import { CoverCard } from "@/components/CoverCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Icon } from "@/components/Icon";
 import { LoadingState } from "@/components/LoadingState";
-import { DEMO_COVERS, asDisplay, type DisplayCover } from "@/lib/demo";
+import { asDisplay, type DisplayCover } from "@/lib/demo";
 import { TEMPLATES } from "@/lib/templates";
 import type { CoverState } from "@/lib/contract";
 import { hasContract } from "@/lib/genlayer";
@@ -80,10 +80,6 @@ export default function CoversPage() {
     () => applyFilters(live, filter, template, query),
     [live, filter, template, query]
   );
-  const demoRows = useMemo(
-    () => applyFilters(DEMO_COVERS, filter, template, query),
-    [filter, template, query]
-  );
 
   return (
     <div>
@@ -97,12 +93,7 @@ export default function CoversPage() {
           </h1>
         </div>
         <div className="flex items-center gap-4 border border-outline-variant bg-surface-container-high px-4 py-2">
-          <div className="flex flex-col gap-1 border-r border-outline-variant pr-4">
-            <span className="font-mono text-[10px] font-bold uppercase text-on-surface-variant">
-              Demo rows
-            </span>
-            <span className="text-2xl font-bold">{DEMO_COVERS.length}</span>
-          </div>
+
           <div className="flex flex-col gap-1 pl-2">
             <span className="font-mono text-[10px] font-bold uppercase text-on-surface-variant">
               Live covers
@@ -168,10 +159,10 @@ export default function CoversPage() {
         <p className="mb-4 font-mono text-[12px] text-error">{loadError}</p>
       ) : null}
 
-      {!loading && liveRows.length === 0 && demoRows.length === 0 ? (
+      {!loading && liveRows.length === 0 ? (
         <EmptyState
           title="No covers in this filter"
-          body="Live rows load from list_cover_ids after deploy. Demo rows are labeled DEMO and are not live millimetres."
+          body="You have not purchased any covers yet."
           action={
             <Link
               href="/buy"
@@ -195,22 +186,10 @@ export default function CoversPage() {
               </div>
             </section>
           ) : null}
-          {demoRows.length > 0 ? (
-            <section>
-              <h2 className="mb-4 font-mono text-[12px] uppercase tracking-widest text-on-surface-variant">
-                Demo · not on-chain
-              </h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {demoRows.map((cover) => (
-                  <CoverCard key={cover.id} cover={cover} />
-                ))}
-              </div>
-            </section>
-          ) : null}
         </div>
       )}
       <p className="mt-6 font-mono text-[12px] text-on-surface-variant">
-        Sample rows are labeled DEMO. Templates: {TEMPLATES.map((t) => t.id).join(", ")}. No
+        Templates: {TEMPLATES.map((t) => t.id).join(", ")}. No
         custom text. Paid is shown only on RESOLVED_PAY, INSUFFICIENT, or CANCELED.
       </p>
     </div>

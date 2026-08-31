@@ -14,14 +14,12 @@ import {
 
 export function DocketActions({
   coverId,
-  demo,
   canCancel,
   canResolve,
   canWithdraw,
   onSettled,
 }: {
   coverId: string;
-  demo: boolean;
   canCancel: boolean;
   canResolve: boolean;
   canWithdraw: boolean;
@@ -35,10 +33,6 @@ export function DocketActions({
   async function run(method: "cancel_cover" | "resolve" | "withdraw", fn: () => Promise<{ hash: string }>) {
     setNote("");
     setHash("");
-    if (demo) {
-      setNote("DEMO rows are not on-chain. Call buy_cover after deploy to get a live cover-{n}.");
-      return;
-    }
     if (wallet.writesBlocked) {
       if (!wallet.address) wallet.openModal();
       setNote(wallet.writesBlocked);

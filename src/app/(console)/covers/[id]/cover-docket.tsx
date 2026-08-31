@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { asDisplay, getDemoCover, observedDisplay, thresholdDisplay, type DisplayCover } from "@/lib/demo";
+import { asDisplay, observedDisplay, thresholdDisplay, type DisplayCover } from "@/lib/demo";
 import { PAYOUT_RATIO, TEMPLATES, resolveOpensIso, weiToGen } from "@/lib/templates";
 import { canMarkPaid, paidReason, weatherForCover } from "@/lib/status";
-import { DemoChip, StatusChip } from "@/components/StatusChip";
+import { StatusChip } from "@/components/StatusChip";
 import { WeatherLayer } from "@/components/WeatherLayer";
 import { ErrorState } from "@/components/ErrorState";
 import { LoadingState } from "@/components/LoadingState";
@@ -17,18 +17,12 @@ import { DocketActions } from "./docket-actions";
 
 export function CoverDocket({ id }: { id: string }) {
   const wallet = useWallet();
-  const [cover, setCover] = useState<DisplayCover | null>(getDemoCover(id) ?? null);
+  const [cover, setCover] = useState<DisplayCover | null>(null);
   const [credit, setCredit] = useState(BigInt(0));
-  const [loading, setLoading] = useState(!getDemoCover(id) && hasContract());
+  const [loading, setLoading] = useState(hasContract());
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    const demo = getDemoCover(id);
-    if (demo && !hasContract()) {
-      setCover(demo);
-      setLoading(false);
-      return;
-    }
     if (hasContract()) {
       setLoading(true);
       try {
@@ -36,12 +30,9 @@ export function CoverDocket({ id }: { id: string }) {
         if (live) {
           setCover(asDisplay(live, false));
           setError("");
-        } else if (demo) {
-          setCover(demo);
-          setError("");
         } else {
           setCover(null);
-          setError(`${id} is not in get_cover and is not a DEMO row.`);
+          setError(`${id} is not in get_cover.`);
         }
         if (wallet.address) {
           setCredit(await readCredit(wallet.address));
@@ -55,7 +46,7 @@ export function CoverDocket({ id }: { id: string }) {
       }
       return;
     }
-    if (!demo) setError(`${id} is not a DEMO row. After deploy this page calls get_cover.`);
+    setError(`Contract not deployed.`);
     setLoading(false);
   }, [id, wallet.address]);
 
@@ -82,9 +73,9 @@ export function CoverDocket({ id }: { id: string }) {
   const unlock = resolveOpensIso(cover.coverage_date);
   const resolveOpen = new Date(unlock).getTime() <= Date.now();
   const isBuyer = Boolean(wallet.address) && wallet.address!.toLowerCase() === cover.buyer.toLowerCase();
-  const canCancel = !cover.demo && cover.state === "OPEN" && isBuyer;
-  const canResolve = !cover.demo && cover.state === "OPEN" && resolveOpen;
-  const canWithdraw = !cover.demo && credit > BigInt(0);
+  const canCancel = cover.state === "OPEN" && isBuyer;
+  const canResolve = cover.state === "OPEN" && resolveOpen;
+  const canWithdraw = credit > BigInt(0);
 
   return (
     <div className="relative">
@@ -100,7 +91,6 @@ export function CoverDocket({ id }: { id: string }) {
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <StatusChip state={cover.state} />
-              {cover.demo ? <DemoChip /> : null}
               <span className="font-mono text-[12px] text-on-surface-variant">
                 TEMPLATE: {cover.template}
               </span>
@@ -111,9 +101,9 @@ export function CoverDocket({ id }: { id: string }) {
             <span className="border border-outline bg-surface-container px-3 py-1 font-mono text-[15px]">
               {shortAddr(cover.buyer)}
             </span>
-            {canMarkPaid(cover.state) ? (
+            {canMarkPaid(cover.state) && isBuyer ? (
               <span className="font-mono text-[10px] font-bold uppercase text-secondary">
-                {paidReason(cover.state)}
+                {credit > 0n ? "Funds secured in escrow" : paidReason(cover.state)}
               </span>
             ) : null}
           </div>
@@ -194,7 +184,6 @@ export function CoverDocket({ id }: { id: string }) {
               canResolve={canResolve}
               canWithdraw={canWithdraw}
               coverId={cover.id}
-              demo={cover.demo}
               onSettled={() => void refresh()}
             />
             <div

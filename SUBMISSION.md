@@ -12,7 +12,7 @@ Rainline is a parametric weather cover primitive designed specifically to highli
 
 ### Addressed Critiques from Previous Models
 Rainline was built to avoid the pitfalls of subjective "AI Courts" and prediction markets:
-* **Global counters:** The contract uses unique string generation (`cover-{id}`) and maps state effectively without relying on vulnerable shared global integer counters for cross-party tracking.
+* **No Global State Contention:** Correlation IDs are derived from deterministic hashes of the sender address, datetime, and constraints.
 * **Party weights:** There is no FOR/AGAINST market mechanic. Payouts are fixed at a 4x ratio and strictly reserved from pre-funded pool liquidity at the moment of purchase, mathematically preventing insolvency.
 * **Subjective labels:** Rainline enforces purely numeric comparisons. "Did it rain heavily?" is replaced with "Was `precipitation_sum >= 5000`?"
 * **UI Mechanics match Contract:** The UI explicitly states that there is no human keeper and no appeals process. The frontend perfectly maps to the contract's fixed methods (`buy_cover`, `cancel_cover`, `resolve`), ensuring users are never promised non-existent on-chain functionality.
