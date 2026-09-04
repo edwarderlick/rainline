@@ -8,7 +8,7 @@ No subjective verdicts. No FOR/AGAINST books. No trapped GEN.
 
 ### 🌐 Live Links
 - **App:** [https://rainline-jet.vercel.app/](https://rainline-jet.vercel.app/)
-- **StudioNet Contract:** `0x2B702D0803DA65B49A8247095B1EC476DED261F0`
+- **StudioNet Contract:** `0x2079fF079758e99cdcB4D9748542CAA02596Af6b`
 - **Chain ID:** 61999
 
 ---
@@ -71,7 +71,7 @@ The `D+1` time lock expired natively on the live contract. The following resolut
 2. **Environment Variables (`.env.local`)**
    ```env
    NEXT_PUBLIC_GENLAYER_NETWORK=studionet
-   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x2B702D0803DA65B49A8247095B1EC476DED261F0
+   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x2079fF079758e99cdcB4D9748542CAA02596Af6b
    ```
 
 3. **Run Development Server**
