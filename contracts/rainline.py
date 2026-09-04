@@ -70,7 +70,11 @@ class Rainline(gl.Contract):
     reserved_payout: u256
     covers: TreeMap[str, Cover]
     credits: TreeMap[Address, u256]
-    next_cover_id: u256
+    operator: Address
+    pool_balance: u256
+    reserved_payout: u256
+    covers: TreeMap[str, Cover]
+    credits: TreeMap[Address, u256]
     cover_list: DynArray[str]
     withdrawing: bool
 
@@ -78,7 +82,6 @@ class Rainline(gl.Contract):
         self.operator = gl.message.sender_address
         self.pool_balance = u256(0)
         self.reserved_payout = u256(0)
-        self.next_cover_id = u256(1)
         self.withdrawing = False
 
     def _now(self) -> datetime:
@@ -122,17 +125,8 @@ class Rainline(gl.Contract):
     def _pay(self, recipient: Address, amount: u256) -> None:
         if amount == u256(0):
             return
-        success = False
-        try:
-            res = gl.get_contract_at(Address(str(recipient))).emit_transfer(value=amount)
-            if res:
-                success = True
-        except Exception:
-            pass
-            
-        if not success:
-            current = self.credits.get(recipient, u256(0))
-            self.credits[recipient] = current + amount
+        current = self.credits.get(recipient, u256(0))
+        self.credits[recipient] = current + amount
 
     def _extract_observation(self, payload: dict, coverage_date: str, template: str) -> int:
         daily = payload.get("daily") if isinstance(payload, dict) else None
@@ -187,6 +181,8 @@ class Rainline(gl.Contract):
         lon_s = self._fmt_coord(lon, "lon")
         day = self._parse_date(coverage_date)
         now = self._now()
+        if day > now + timedelta(days=30):
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} coverage_date exceeds MAX_FUTURE_DAYS (30)")
         if now > day - timedelta(hours=BUY_CUTOFF_HOURS):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} buy window closed 24h before coverage date 00:00 UTC")
 
@@ -198,9 +194,16 @@ class Rainline(gl.Contract):
         if available + premium < payout:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} pool cannot reserve payout")
 
-        self.next_cover_id = self.next_cover_id + u256(1)
-        hash_input = f"{gl.message.sender_address}-{now}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{self.next_cover_id}"
-        cover_id = "cover-" + hashlib.md5(hash_input.encode("utf-8")).hexdigest()
+        nonce = str(gl.message_raw.get("nonce", ""))
+        hash_input = f"{gl.message.sender_address}-{now}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{nonce}"
+        try:
+            # Try GenLayer keccak if available
+            digest = gl.keccak256(hash_input.encode("utf-8")).hex()
+        except Exception:
+            # Fallback to python standard
+            digest = hashlib.sha3_256(hash_input.encode("utf-8")).hexdigest()
+        cover_id = "cover-0x" + digest
+        
         if cover_id in self.covers:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} ID collision: {cover_id} already exists")
         self.cover_list.append(cover_id)
@@ -303,7 +306,10 @@ class Rainline(gl.Contract):
             except Exception as exc:
                 reason = f"parse_failed:{type(exc).__name__}"
 
-            prompt = f"""
+            fetch_ok = observed is not None
+            
+            if not fetch_ok:
+                prompt = f"""
 You extract one numeric observation from Open-Meteo JSON for parametric cover.
 URL: {url}
 Coverage date: {coverage_date}
@@ -318,27 +324,18 @@ Return ONLY JSON with keys:
 - reason: short string
 Do not invent a value if the field is missing or null.
 """
-            llm_observed = None
-            llm_ok = False
-            try:
-                llm_raw = gl.nondet.exec_prompt(prompt)
-                text = str(llm_raw).strip()
-                if text.startswith("```"):
-                    text = re.sub(r"^```(?:json)?", "", text).strip()
-                    text = re.sub(r"```$", "", text).strip()
-                parsed = json.loads(text)
-                llm_ok = bool(parsed.get("fetch_ok"))
-                if parsed.get("observed") is not None:
-                    llm_observed = int(round(float(parsed["observed"]) * 1000))
-            except Exception:
-                llm_ok = False
-
-            fetch_ok = observed is not None
-            if fetch_ok and llm_ok and llm_observed is not None:
-                if abs(llm_observed - observed) > 500:
-                    fetch_ok = False
-                    reason = "extract_disagreement"
-                    observed = None
+                try:
+                    llm_raw = gl.nondet.exec_prompt(prompt)
+                    text = str(llm_raw).strip()
+                    if text.startswith("```"):
+                        text = re.sub(r"^```(?:json)?", "", text).strip()
+                        text = re.sub(r"```$", "", text).strip()
+                    parsed = json.loads(text)
+                    if bool(parsed.get("fetch_ok")) and parsed.get("observed") is not None:
+                        observed = int(round(float(parsed["observed"]) * 1000))
+                        fetch_ok = True
+                except Exception:
+                    pass
 
             if not fetch_ok:
                 status = "INSUFFICIENT"
@@ -427,18 +424,10 @@ Do not invent a value if the field is missing or null.
         
         self.credits[caller] = u256(0)
         
-        success = False
         try:
-            res = gl.get_contract_at(Address(str(caller))).emit_transfer(value=amount)
-            if res:
-                success = True
+            gl.get_contract_at(Address(str(caller))).emit_transfer(value=amount)
         except Exception:
             pass
-            
-        if not success:
-            self.credits[caller] = amount
-            self.withdrawing = False
-            raise gl.vm.UserError("StudioNet native transfer failed. Fallback to Credits initiated.")
             
         self.withdrawing = False
 

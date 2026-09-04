@@ -90,7 +90,7 @@ export function CoverDocket({ id }: { id: string }) {
               {cover.id}
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <StatusChip state={cover.state} />
+              <StatusChip state={cover.state} credit={credit} />
               <span className="font-mono text-[12px] text-on-surface-variant">
                 TEMPLATE: {cover.template}
               </span>

@@ -86,10 +86,10 @@ function extractCoverId(receipt: {
   const raw = receipt.consensus_data?.leader_receipt?.[0]?.result;
   if (typeof raw === "string") {
     const trimmed = raw.trim().replace(/^"+|"+$/g, "");
-    if (/^cover-\d+$/.test(trimmed)) return trimmed;
+    if (/^cover-(0x)?[0-9a-fA-F]+$/.test(trimmed)) return trimmed;
     try {
       const parsed = JSON.parse(trimmed) as unknown;
-      if (typeof parsed === "string" && /^cover-\d+$/.test(parsed)) return parsed;
+      if (typeof parsed === "string" && /^cover-(0x)?[0-9a-fA-F]+$/.test(parsed)) return parsed;
     } catch {
       /* not json */
     }

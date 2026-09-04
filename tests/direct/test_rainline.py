@@ -61,7 +61,7 @@ def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, 
     
     def buy(i):
         _local.vm = direct_vm
-        return deployed.buy_cover("RAIN", f"19.0{i}", "72.88", f"2026-10-0{i+1}", 25000)
+        return deployed.buy_cover("RAIN", f"19.0{i}", "72.88", f"2026-09-2{i+1}", 25000)
         
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
         futures = [ex.submit(buy, i) for i in range(5)]
@@ -73,7 +73,7 @@ def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, 
         assert cid.startswith("cover-")
         cover = deployed.get_cover(cid)
         assert cover["lat"] == f"19.0{i}00"
-        assert cover["coverage_date"] == f"2026-10-0{i+1}"
+        assert cover["coverage_date"] == f"2026-09-2{i+1}"
 
 
 def test_late_buy_reverts(direct_vm, deployed, direct_alice):
@@ -87,7 +87,10 @@ def test_late_buy_reverts(direct_vm, deployed, direct_alice):
 def test_cancel_refunds_buyer_only(direct_vm, deployed, direct_alice, direct_bob):
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 11, 10, tzinfo=timezone.utc)
     cover_id = deployed.buy_cover("RAIN", "51.5074", "-0.1278", "2026-12-01", 25000)
+    deployed._instance._now = real_now
 
     direct_vm.sender = direct_bob
     with pytest.raises(Exception, match="Unauthorized"):
@@ -182,7 +185,10 @@ def test_resolve_reverts_before_day_closed(direct_vm, deployed, direct_alice):
 def test_operator_cannot_drain_reserved(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 10, 10, tzinfo=timezone.utc)
     deployed.buy_cover("DRY", "1.3521", "103.8198", "2026-11-01", 1000)
+    deployed._instance._now = real_now
     pool = deployed.get_pool()
     with pytest.raises(Exception, match="unreserved"):
         deployed.withdraw_unreserved(pool["pool_balance"])

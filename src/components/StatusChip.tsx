@@ -1,7 +1,7 @@
 import type { CoverState } from "@/lib/contract";
 import { canMarkPaid } from "@/lib/status";
 
-export function StatusChip({ state }: { state: CoverState }) {
+export function StatusChip({ state, credit = 0n }: { state: CoverState; credit?: bigint }) {
   const paid = canMarkPaid(state);
   const tone =
     state === "OPEN"
@@ -21,7 +21,11 @@ export function StatusChip({ state }: { state: CoverState }) {
       </span>
       {paid ? (
         <span className="border border-secondary bg-secondary-container w-fit whitespace-nowrap px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-on-secondary-container">
-          {state === "REFUNDED" || state === "INSUFFICIENT" ? "Refunded" : "Paid"}
+          {credit > 0n && (state === "RESOLVED_PAY" || state === "INSUFFICIENT")
+            ? "Claimable"
+            : state === "REFUNDED" || state === "INSUFFICIENT"
+              ? "Refunded"
+              : "Paid"}
         </span>
       ) : null}
     </span>
