@@ -11,7 +11,7 @@ An automated deployment script (`scripts/deploy_studionet.mjs`) was used to inte
 3. Deployed the contract to StudioNet.
 4. Called `fund_pool` to seed the initial liquidity with **50 GEN**.
 
-The live contract address is: **`0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6`**
+The live contract address is: **`0x2B702D0803DA65B49A8247095B1EC476DED261F0`**
 
 ### 2. Frontend Wiring
 The frontend was perfectly architected for the transition. All data-fetching layers in `src/lib/rainline.ts` were already utilizing the live SDK. The only change required was:

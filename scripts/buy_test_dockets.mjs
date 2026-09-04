@@ -14,7 +14,7 @@ import { createClient, createAccount } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 
 const RPC = "https://studio.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x970dcC20c90F90fc7749f6E10d7AC5a23D6D98C6";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x2B702D0803DA65B49A8247095B1EC476DED261F0";
 const OPERATOR_KEY = process.env.OPERATOR_PRIVATE_KEY;
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
 
