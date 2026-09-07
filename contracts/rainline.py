@@ -70,11 +70,6 @@ class Rainline(gl.Contract):
     reserved_payout: u256
     covers: TreeMap[str, Cover]
     credits: TreeMap[Address, u256]
-    operator: Address
-    pool_balance: u256
-    reserved_payout: u256
-    covers: TreeMap[str, Cover]
-    credits: TreeMap[Address, u256]
     cover_list: DynArray[str]
     withdrawing: bool
 
@@ -241,8 +236,9 @@ class Rainline(gl.Contract):
         if str(gl.message.sender_address).lower() != str(cover.buyer).lower():
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Unauthorized: only buyer can cancel")
         now = self._now()
-        if now >= self._parse_date(cover.coverage_date):
-            raise gl.vm.UserError(f"{ERROR_EXPECTED} cancel window closed once coverage day starts")
+        day = self._parse_date(cover.coverage_date)
+        if now > day - timedelta(hours=BUY_CUTOFF_HOURS):
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} cancel window closed 24h before coverage date 00:00 UTC")
 
         cover.state = "REFUNDED"
         cover.result_json = json.dumps(
@@ -289,7 +285,10 @@ class Rainline(gl.Contract):
                 else:
                     raw_body = str(body)
                 if status_code is not None and int(status_code) >= 400:
-                    reason = f"http_{status_code}"
+                    if int(status_code) >= 500 or int(status_code) == 429:
+                        reason = f"NETWORK_ERROR:http_{status_code}"
+                    else:
+                        reason = f"http_{status_code}"
                 else:
                     payload = json.loads(raw_body)
                     daily = payload.get("daily") if isinstance(payload, dict) else None
@@ -303,8 +302,10 @@ class Rainline(gl.Contract):
                     if idx >= len(values) or values[idx] is None:
                         raise ValueError("null observation")
                     observed = int(round(float(values[idx]) * 1000))
-            except Exception as exc:
+            except ValueError as exc:
                 reason = f"parse_failed:{type(exc).__name__}"
+            except Exception as exc:
+                reason = f"NETWORK_ERROR:{type(exc).__name__}"
 
             fetch_ok = observed is not None
             
@@ -338,7 +339,10 @@ Do not invent a value if the field is missing or null.
                     pass
 
             if not fetch_ok:
-                status = "INSUFFICIENT"
+                if reason.startswith("NETWORK_ERROR"):
+                    status = "NETWORK_ERROR"
+                else:
+                    status = "INSUFFICIENT"
             else:
                 hit = (
                     observed >= threshold
@@ -365,6 +369,9 @@ Do not invent a value if the field is missing or null.
         status = str(result.get("status") or "INSUFFICIENT")
         observed_milli = result.get("observed_milli")
         reason = str(result.get("reason") or "")
+
+        if status == "NETWORK_ERROR":
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} Network error fetching evidence. Please retry.")
 
         if status not in ("PAY", "KEEP", "INSUFFICIENT"):
             status = "INSUFFICIENT"
