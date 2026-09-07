@@ -17,20 +17,23 @@ Rainline was built to avoid the pitfalls of subjective "AI Courts" and predictio
 * **Subjective labels:** Rainline enforces purely numeric comparisons. "Did it rain heavily?" is replaced with "Was `precipitation_sum >= 5000`?"
 * **UI Mechanics match Contract:** The UI explicitly states that there is no human keeper and no appeals process. The frontend perfectly maps to the contract's fixed methods (`buy_cover`, `cancel_cover`, `resolve`), ensuring users are never promised non-existent on-chain functionality.
 
-### ⚡ Live StudioNet Settlement Proof (Sept 3, 2026 Covers)
-The `D+1` time lock expired natively on the live contract. The following resolutions were executed successfully on StudioNet, proving exact balance accounting and deterministic Oracle evaluation:
+### ⚡ Live StudioNet Settlement Proof (Sept 6, 2026 Covers)
+The `D+1` time lock expired natively on the live contract. The following resolutions were executed successfully on the hardened Pull-Payment architecture (Contract: `0x2079fF079758e99cdcB4D9748542CAA02596Af6b`), proving exact balance accounting and deterministic Oracle evaluation:
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
-    *   **Params:** Mumbai RAIN, Threshold >= 1.0mm. Observed: 5.6mm. 
-    *   **Transaction Hash:** `0xb38596832c9683474ea0cecbc45ba48fc4fd1f218d8844c4d8e8cef1fb312c49`
-    *   **Result:** Contract successfully evaluated `5.6 >= 1.0` and routed 4x payout.
+    *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 
+    *   **Observed:** 5.3 mm.
+    *   **Transaction Hash:** `0xb4ab44656413dce8bc78b9fb51bef3f2f1587114fb036857aa2fe12c2b25e8cc`
+    *   **Result:** Contract successfully evaluated `5.3 >= 2.0` and credited the 4x payout to the user's mapping, which was then successfully withdrawn via the CEI-compliant `withdraw()` function.
 
 *   **🛡️ Path: RESOLVED_KEEP (Trigger Missed)**
-    *   **Params:** Mumbai RAIN, Threshold >= 500.0mm. Observed: 5.6mm.
-    *   **Transaction Hash:** `0x6247514a8bb07e9ba402b48962f2572a321c9f6e5a39a2a2626a43a5a3b7ce8c`
-    *   **Result:** Contract successfully evaluated `5.6 < 500.0`, kept premium, and released reserve.
+    *   **Params:** Mumbai RAIN, Threshold >= 500.0 mm. 
+    *   **Observed:** 5.3 mm.
+    *   **Transaction Hash:** `0xc56b9c88fc31771733bb514a3439bef96b79825e2252b5a0ef80dc7b850c42b3`
+    *   **Result:** Contract successfully evaluated `5.3 < 500.0`, kept premium, and released reserve.
 
-*   **🌊 Oracle Robustness Proof (Unplanned KEEP)**
-    *   **Params:** Equatorial Atlantic (10.0000, 10.0000) HEAT, Threshold >= 30.0°C. 
-    *   **Transaction Hash:** `0x55da6ef0bdff9e972e6f8fd0875b2a0af13efa9df5d338e5ec29b52729916fae`
-    *   **Result:** This docket was intended to test the `INSUFFICIENT` API failure path by querying the deep ocean. Impressively, the Open-Meteo Oracle successfully returned historical temperature data (`29.9 °C`) for this remote location. The contract flawlessly executed its deterministic logic, evaluated `29.9 < 30.0`, and cleanly settled the docket as `RESOLVED_KEEP`.
+*   **🌊 Oracle Robustness Proof (Unplanned KEEP on Edge Coordinates)**
+    *   **Params:** Equatorial Atlantic (10.0000, 10.0000) HEAT, Threshold >= 35.0 °C. 
+    *   **Observed:** 30.7 °C.
+    *   **Transaction Hash:** `0x3cfa0a2b0a5a19d00e3487da67824f2b94b2a294af88b6e4dedf5533b51be487`
+    *   **Result:** This docket tested the deep ocean coordinates. The GenLayer consensus gracefully handled the remote data fetch, evaluating `30.7 < 35.0`, and cleanly settled the docket as `RESOLVED_KEEP` without reverting.
