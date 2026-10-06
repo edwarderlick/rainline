@@ -27,7 +27,7 @@ for (const envFile of [".env.local", ".env"]) {
 }
 
 const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x23fFF100306713f69E677076eAfAAAd5E9FDf413";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x4656AEA89b67C61A6B99689613735013e8635B0d";
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
 const profile = JSON.parse(readFileSync(resolve(root, "fee-profile.json"), "utf8"));
 

@@ -66,6 +66,15 @@ class Cover:
     created_at: str
 
 
+@gl.evm.contract_interface
+class _Recipient:
+    class View:
+        pass
+
+    class Write:
+        pass
+
+
 class Rainline(gl.contract.Contract):
     operator: Address
     pool_balance: u256
@@ -165,6 +174,21 @@ class Rainline(gl.contract.Contract):
             return
         current = self.credits.get(recipient, u256(0))
         self.credits[recipient] = current + amount
+
+    def _emit_transfer(self, recipient: Address, amount: u256) -> None:
+        try:
+            target = Address(recipient.as_hex)
+        except Exception:
+            target = recipient
+        try:
+            _Recipient(target).emit_transfer(value=amount)
+            return
+        except Exception:
+            pass
+        try:
+            gl.get_contract_at(target).emit_transfer(value=amount)
+        except Exception:
+            gl.contract.get_at(target).emit_transfer(value=amount)
 
     def _risk_key(self, template: str, lat: str, lon: str, coverage_date: str) -> str:
         return f"{template}:{lat}:{lon}:{coverage_date}"
@@ -504,7 +528,7 @@ Do not invent a value if the field is missing or null.
         self.credits[caller] = u256(0)
         
         try:
-            gl.get_contract_at(Address(str(caller))).emit_transfer(value=amount)
+            self._emit_transfer(caller, amount)
         except Exception:
             self.credits[caller] = amount
             self.withdrawing = False
