@@ -1,12 +1,12 @@
 /**
- * StudioNet balance-delta proof.
+ * Studio Next balance-delta proof.
  * Usage:
  *   CONTRACT=0x... BUYER=0x... RPC=https://... node scripts/verify_payout.mjs
  *
  * Print balances before/after a RESOLVED_PAY and an INSUFFICIENT refund.
  * The UI must not say Paid until one of these deltas is real.
  */
-const rpc = process.env.RPC || "https://studio.genlayer.com/api";
+const rpc = process.env.RPC || "https://studio-next.genlayer.com/api";
 const buyer = process.env.BUYER;
 if (!buyer) {
   console.log("Set BUYER=0x... and re-run after a live resolve.");

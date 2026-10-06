@@ -12,11 +12,11 @@ import {
 } from "react";
 import {
   hasContract,
-  isStudioNetChain,
+  isStudioNextChain,
   readChainId,
   readStudioBalance,
   silentAccounts,
-  switchToStudioNet,
+  switchToStudioNext,
   type EthereumProvider,
 } from "./genlayer";
 import {
@@ -181,7 +181,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   /**
    * connect(): explicit user click. ALWAYS eth_requestAccounts on the
    * EIP-6963 provider they clicked. That is the MetaMask popup.
-   * client.connect("studionet") is optional and must never replace step 1.
+   * client.connect("studioDevnet") is optional and must never replace step 1.
    */
   const connect = useCallback(
     async (wallet: DetectedWallet) => {
@@ -197,16 +197,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           throw new Error("Wallet did not return an account.");
         }
         setActiveProvider(wallet.provider);
-        await switchToStudioNet(wallet.provider);
+        await switchToStudioNext(wallet.provider);
         try {
           const { createClient } = await import("genlayer-js");
-          const { studionet } = await import("genlayer-js/chains");
+          const { studioDevnet } = await import("genlayer-js/chains");
           const client = createClient({
-            chain: studionet,
+            chain: studioDevnet,
             account: addr as `0x${string}`,
             provider: wallet.provider,
-          });
-          await client.connect("studionet");
+            endpoint: process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio-next.genlayer.com/api",
+          } as Parameters<typeof createClient>[0]);
+          await client.connect("studioDevnet");
         } catch {
           /* Snaps are MetaMask-only. Permission already granted via eth_requestAccounts. */
         }
@@ -304,8 +305,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const wc = await EthereumProvider.init({
         projectId,
         showQrModal: true,
-        chains: [61999],
-        optionalChains: [61999],
+        chains: [61997],
+        optionalChains: [61997],
         methods: [
           "eth_sendTransaction",
           "personal_sign",
@@ -313,10 +314,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           "wallet_switchEthereumChain",
           "wallet_addEthereumChain",
         ],
-        rpcMap: { "61999": "https://studio.genlayer.com/api" },
+        rpcMap: { "61997": "https://studio-next.genlayer.com/api" },
         metadata: {
           name: "Rainline",
-          description: "Parametric weather cover on GenLayer StudioNet",
+          description: "Parametric weather cover on GenLayer Studio Next",
           url: typeof window !== "undefined" ? window.location.origin : "https://rainline.app",
           icons: typeof window !== "undefined" ? [`${window.location.origin}/logo.svg`] : [],
         },
@@ -328,7 +329,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             () =>
               reject(
                 new Error(
-                  "WalletConnect timed out. Use an injected wallet, or accept StudioNet (chain 61999)."
+                  "WalletConnect timed out. Use an injected wallet, or accept Studio Next (chain 61997)."
                 )
               ),
             90000
@@ -342,7 +343,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         clearSession();
         throw new Error("WalletConnect did not return an account.");
       }
-      await switchToStudioNet(eip);
+      await switchToStudioNext(eip);
       const confirmed = await liveAccounts(eip);
       if (confirmed.length === 0) {
         clearSession();
@@ -350,9 +351,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
       await paintLive(eip, WC_CONNECTOR_ID, confirmed);
       const chain = await readChainId(eip);
-      if (!isStudioNetChain(chain)) {
+      if (!isStudioNextChain(chain)) {
         throw new Error(
-          "WalletConnect session is not on StudioNet (chain 61999). The wallet must accept that custom network."
+          "WalletConnect session is not on Studio Next (chain 61997). The wallet must accept that custom network."
         );
       }
       setModalOpen(false);
@@ -361,7 +362,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setError(
         err instanceof Error
           ? err.message
-          : "WalletConnect could not add StudioNet (chain 61999). Use an injected wallet."
+          : "WalletConnect could not add Studio Next (chain 61997). Use an injected wallet."
       );
     } finally {
       setConnecting(false);
@@ -373,10 +374,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const eth = providerRef.current;
       if (!eth) throw new Error("Connect a wallet first.");
-      await switchToStudioNet(eth);
+      await switchToStudioNext(eth);
       setChainId(await readChainId(eth));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not switch to StudioNet");
+      setError(err instanceof Error ? err.message : "Could not switch to Studio Next");
     }
   }, []);
 
@@ -422,7 +423,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setBalanceLoading(false);
       return;
     }
-    if (!isStudioNetChain(chainIdRef.current)) {
+    if (!isStudioNextChain(chainIdRef.current)) {
       setBalanceWei(null);
       setBalanceError(false);
       setBalanceLoading(false);
@@ -447,13 +448,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     void refreshBalance();
   }, [address, chainId, refreshBalance]);
 
-  const wrongNetwork = Boolean(address) && !isStudioNetChain(chainId);
+  const wrongNetwork = Boolean(address) && !isStudioNextChain(chainId);
   const writesBlocked = !hasContract()
     ? "Writes are disabled until NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS is set."
     : !address
       ? "Connect a wallet to write."
       : wrongNetwork
-        ? "This app writes on StudioNet (chain 61999)."
+        ? "This app writes on Studio Next (chain 61997)."
         : null;
 
   const value = useMemo(

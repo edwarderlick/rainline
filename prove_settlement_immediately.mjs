@@ -1,13 +1,15 @@
 
 import fs from "fs";
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 
-const RPC = "https://studio.genlayer.com/api";
+const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
 
 const chain = {
-  ...studionet,
+  ...studioDevnet,
+  id: 61997,
+  name: "GenLayer Studio Next",
   rpcUrls: { default: { http: [RPC] } },
 };
 
@@ -49,8 +51,8 @@ async function run() {
   await rpc("sim_fundAccount", [deployer.address, Number(30n * 10n ** 18n)]);
   await rpc("sim_fundAccount", [buyer.address, Number(20n * 10n ** 18n)]);
 
-  const deployerClient = createClient({ chain, account: deployer });
-  const buyerClient = createClient({ chain, account: buyer });
+  const deployerClient = createClient({ chain, endpoint: RPC, account: deployer });
+  const buyerClient = createClient({ chain, endpoint: RPC, account: buyer });
 
   console.log("\nDeploying rainline_timeless.py...");
   const code = fs.readFileSync("contracts/rainline_timeless.py", "utf8");
@@ -71,7 +73,7 @@ async function run() {
 
   // 1. PAY: London Rain
   console.log("Buying Docket 1 (PAY expected)...");
-  const hash1 = await buyerClient.writeContract({ address: CONTRACT, functionName: "buy_cover", args: ["RAIN", "51.5072", "-0.1276", historicalDate, 10], value: PREMIUM });
+  const hash1 = await buyerClient.writeContract({ address: CONTRACT, functionName: "buy_cover", args: ["RAIN", "51.5072", "-0.1276", historicalDate, 25000], value: PREMIUM });
   
   // 2. KEEP: Phoenix Rain (threshold very high)
   console.log("Buying Docket 2 (KEEP expected)...");

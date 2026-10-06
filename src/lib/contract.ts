@@ -1,16 +1,16 @@
 export const CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS ?? "";
 
-export const NETWORK = process.env.NEXT_PUBLIC_GENLAYER_NETWORK ?? "studionet";
+export const NETWORK = process.env.NEXT_PUBLIC_GENLAYER_NETWORK ?? "studio-next";
 
-export const STUDIONET_CHAIN_ID = Number(
-  process.env.NEXT_PUBLIC_GENLAYER_CHAIN_ID ?? 61999
+export const STUDIO_NEXT_CHAIN_ID = Number(
+  process.env.NEXT_PUBLIC_GENLAYER_CHAIN_ID ?? 61997
 );
-export const STUDIONET_CHAIN_ID_HEX = `0x${STUDIONET_CHAIN_ID.toString(16)}`;
-export const STUDIONET_RPC =
-  process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio.genlayer.com/api";
-export const STUDIONET_EXPLORER = "https://explorer-studio.genlayer.com";
-export const STUDIONET_NAME = "GenLayer StudioNet";
+export const STUDIO_NEXT_CHAIN_ID_HEX = `0x${STUDIO_NEXT_CHAIN_ID.toString(16)}`;
+export const STUDIO_NEXT_RPC =
+  process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio-next.genlayer.com/api";
+export const STUDIO_NEXT_EXPLORER = "https://explorer-studio-dev.genlayer.com";
+export const STUDIO_NEXT_NAME = "GenLayer Studio Next";
 
 export type CoverState =
   | "OPEN"

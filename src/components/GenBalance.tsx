@@ -14,7 +14,7 @@ export function GenBalanceLine({
   if (wrongNetwork) {
     return (
       <span className={`font-mono text-[10px] uppercase tracking-[0.04em] text-error ${className}`}>
-        switch to StudioNet to read GEN
+        switch to Studio Next to read GEN
       </span>
     );
   }

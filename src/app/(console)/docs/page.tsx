@@ -15,12 +15,12 @@ export default function DocsPage() {
             Critical notice
           </span>
           <p className="text-[15px] leading-[22px] text-on-surface-variant">
-            Rainline operates strictly within the parameters on this page. StudioNet demo. Not a
+            Rainline operates strictly within the parameters on this page. Studio Next demo. Not a
             licensed carrier.
           </p>
           <p className="text-[15px] leading-[22px] text-on-surface-variant">
             Connect any EIP-1193 wallet (MetaMask, Rabby, Brave, Coinbase, Rainbow). The wallet
-            must accept a custom network: StudioNet, chain 61999, RPC studio.genlayer.com/api,
+            must accept a custom network: Studio Next, chain 61997, RPC studio-next.genlayer.com/api,
             symbol GEN. Get test GEN from the Studio faucet.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function DocsPage() {
               Not insurance
             </h3>
             <p className="text-lg leading-7">
-              Rainline is parametric cover on GenLayer StudioNet. It is not a licensed insurance
+              Rainline is parametric cover on GenLayer Studio Next. It is not a licensed insurance
               policy and not a weather prediction market. Contracts trigger on predefined data
               parameters. They do not indemnify actual loss.
             </p>

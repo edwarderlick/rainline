@@ -7,11 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:logic": "python -m pytest tests/unit -v"
+    "test:logic": "python -m pytest tests/unit -v",
+    "deploy:studio-next": "node scripts/deploy_studio_next.mjs"
   },
   "dependencies": {
+    "@genlayer/transaction-kit": "0.1.0-rc.2",
+    "@genlayer/transaction-kit-react": "0.1.0-rc.2",
     "@walletconnect/ethereum-provider": "^2.23.10",
-    "genlayer-js": "^1.1.8",
+    "genlayer-js": "2.0.0-rc.1",
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8"

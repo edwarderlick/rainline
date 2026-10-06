@@ -1,10 +1,10 @@
 import {
   CONTRACT_ADDRESS,
-  STUDIONET_CHAIN_ID,
-  STUDIONET_CHAIN_ID_HEX,
-  STUDIONET_EXPLORER,
-  STUDIONET_NAME,
-  STUDIONET_RPC,
+  STUDIO_NEXT_CHAIN_ID,
+  STUDIO_NEXT_CHAIN_ID_HEX,
+  STUDIO_NEXT_EXPLORER,
+  STUDIO_NEXT_NAME,
+  STUDIO_NEXT_RPC,
 } from "./contract";
 
 export type EthereumProvider = {
@@ -38,7 +38,7 @@ function studioJsonRpcUrl(): string {
   if (typeof window !== "undefined") {
     return `${window.location.origin}/api/genlayer`;
   }
-  return STUDIONET_RPC;
+  return STUDIO_NEXT_RPC;
 }
 
 /** Native GEN via Studio RPC (wei). Throws if the node does not return a result. */
@@ -75,21 +75,21 @@ export async function readChainId(provider?: EthereumProvider): Promise<string |
   return id;
 }
 
-export function isStudioNetChain(chainId: string | null): boolean {
+export function isStudioNextChain(chainId: string | null): boolean {
   if (!chainId) return false;
   const n = Number.parseInt(chainId, 16);
-  return n === STUDIONET_CHAIN_ID;
+  return n === STUDIO_NEXT_CHAIN_ID;
 }
 
-export async function switchToStudioNet(provider?: EthereumProvider): Promise<void> {
+export async function switchToStudioNext(provider?: EthereumProvider): Promise<void> {
   const eth = provider ?? getEthereum();
   if (!eth) throw new Error("No wallet connected. Install MetaMask or Rabby.");
   const current = (await eth.request({ method: "eth_chainId" })) as string;
-  if (isStudioNetChain(current)) return;
+  if (isStudioNextChain(current)) return;
   try {
     await eth.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: STUDIONET_CHAIN_ID_HEX }],
+      params: [{ chainId: STUDIO_NEXT_CHAIN_ID_HEX }],
     });
   } catch (err) {
     const code = (err as { code?: number }).code;
@@ -98,17 +98,17 @@ export async function switchToStudioNet(provider?: EthereumProvider): Promise<vo
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: STUDIONET_CHAIN_ID_HEX,
-            chainName: STUDIONET_NAME,
+            chainId: STUDIO_NEXT_CHAIN_ID_HEX,
+            chainName: STUDIO_NEXT_NAME,
             nativeCurrency: { name: "GEN", symbol: "GEN", decimals: 18 },
-            rpcUrls: [STUDIONET_RPC],
-            blockExplorerUrls: [STUDIONET_EXPLORER],
+            rpcUrls: [STUDIO_NEXT_RPC],
+            blockExplorerUrls: [STUDIO_NEXT_EXPLORER],
           },
         ],
       });
       return;
     }
-    throw err instanceof Error ? err : new Error("Could not switch to StudioNet (chain 61999).");
+    throw err instanceof Error ? err : new Error("Could not switch to Studio Next (chain 61997).");
   }
 }
 
@@ -118,7 +118,7 @@ export async function switchToStudioNet(provider?: EthereumProvider): Promise<vo
  */
 export function explorerHint(): string {
   return hasContract()
-    ? `StudioNet ${CONTRACT_ADDRESS}`
+    ? `Studio Next ${CONTRACT_ADDRESS}`
     : "Contract not deployed yet - set NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS";
 }
 
@@ -130,6 +130,6 @@ export function writesBlockReason(opts: {
     return "Writes are disabled until NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS is set.";
   }
   if (!opts.address) return "Connect a wallet to write.";
-  if (opts.wrongNetwork) return "This app writes on StudioNet (chain 61999).";
+  if (opts.wrongNetwork) return "This app writes on Studio Next (chain 61997).";
   return null;
 }

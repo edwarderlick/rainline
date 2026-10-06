@@ -1,4 +1,4 @@
-# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
+# { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 
 import json
 import re
@@ -6,6 +6,13 @@ import hashlib
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from genlayer import *
+import genlayer as gl
+try:
+    import genlayer.storage as genlayer_storage
+    from genlayer.storage import DynArray, TreeMap
+    allow_storage = genlayer_storage.allow
+except ImportError:
+    pass
 
 
 ERROR_EXPECTED = "[EXPECTED]"
@@ -19,8 +26,8 @@ TEMPLATE_FIELD = {
 }
 SOURCE_HOST = "historical-forecast-api.open-meteo.com"
 PAYOUT_RATIO = 4
-MIN_PREMIUM_WEI = u256(10**16)
-MAX_PREMIUM_WEI = u256(10 * 10**18)
+MIN_PREMIUM_WEI = 10**16
+MAX_PREMIUM_WEI = 10 * 10**18
 BUY_CUTOFF_HOURS = 24
 EXPOSURE_BPS_DENOMINATOR = 10000
 MAX_EVENT_EXPOSURE_BPS = 2500
@@ -30,26 +37,6 @@ UNDERWRITING_LIMITS = {
     "HEAT": (35000, 55000),
 }
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-
-
-class CoverCreated(gl.Event):
-    def __init__(self, cover_id: str, template: str, premium: u256, /):
-        pass
-
-
-class CoverResolved(gl.Event):
-    def __init__(self, cover_id: str, status: str, /):
-        pass
-
-
-class CoverCanceled(gl.Event):
-    def __init__(self, cover_id: str, /):
-        pass
-
-
-class PoolFunded(gl.Event):
-    def __init__(self, amount: u256, /):
-        pass
 
 
 @allow_storage
@@ -71,7 +58,7 @@ class Cover:
     created_at: str
 
 
-class Rainline(gl.Contract):
+class Rainline(gl.contract.Contract):
     operator: Address
     pool_balance: u256
     reserved_payout: u256
@@ -174,7 +161,6 @@ class Rainline(gl.Contract):
         if value == u256(0):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} Value must be greater than 0")
         self.pool_balance = self.pool_balance + value
-        PoolFunded(value).emit()
 
     @gl.public.write.payable
     def buy_cover(
@@ -190,9 +176,9 @@ class Rainline(gl.Contract):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} template must be RAIN, DRY, or HEAT")
 
         premium = gl.message.value
-        if premium < MIN_PREMIUM_WEI:
+        if premium < u256(MIN_PREMIUM_WEI):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} premium below 0.01 GEN")
-        if premium > MAX_PREMIUM_WEI:
+        if premium > u256(MAX_PREMIUM_WEI):
             raise gl.vm.UserError(f"{ERROR_EXPECTED} premium above 10 GEN")
 
         threshold = u256(int(threshold_milli))
@@ -259,7 +245,6 @@ class Rainline(gl.Contract):
             observed_milli="",
             created_at=str(gl.message_raw.get("datetime", "")),
         )
-        CoverCreated(cover_id, template, premium).emit()
         return cover_id
 
     @gl.public.write
@@ -287,7 +272,6 @@ class Rainline(gl.Contract):
         self.pool_balance = self.pool_balance - cover.premium
         self.reserved_payout = self.reserved_payout - cover.payout
         self._release_exposure(cover)
-        CoverCanceled(cover_id).emit()
         self._pay(cover.buyer, cover.premium)
 
     @gl.public.write
@@ -449,7 +433,6 @@ Do not invent a value if the field is missing or null.
         
         # 2. Write to Storage
         self.covers[cover_id] = cover
-        CoverResolved(cover_id, status).emit()
         
         # 3. Interactions (External Calls)
         if status == "PAY":

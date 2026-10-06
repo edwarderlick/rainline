@@ -36,7 +36,7 @@ export function SiteFooter({ inverted = false }: { inverted?: boolean }) {
               inverted ? "text-outline-variant" : "text-on-surface-variant"
             }`}
           >
-            {explorerHint()}. Not licensed insurance. StudioNet test GEN.
+            {explorerHint()}. Not licensed insurance. Studio Next test GEN.
           </p>
         </div>
         {!inverted ? (

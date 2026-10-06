@@ -19,8 +19,16 @@ Rainline was built to avoid the pitfalls of subjective "AI Courts" and predictio
 * **Subjective labels:** Rainline enforces purely numeric comparisons. "Did it rain heavily?" is replaced with "Was `precipitation_sum >= 5000`?"
 * **UI Mechanics match Contract:** The UI explicitly states that there is no human keeper and no appeals process. The frontend perfectly maps to the contract's fixed methods (`buy_cover`, `cancel_cover`, `resolve`), ensuring users are never promised non-existent on-chain functionality.
 
-### ⚡ Live StudioNet Settlement Proof (Sept 6, 2026 Covers)
-Earlier live covers proved the `D+1` settlement path on StudioNet. The current hardened contract is `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+### ⚡ Live Settlement Proof (Sept 6, 2026 Covers)
+Earlier live covers proved the `D+1` settlement path. The current hardened Studio Next contract is `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+
+### Studio Next Deployment Proof (Oct 6, 2026)
+
+- **Contract:** `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`
+- **Deploy tx:** `0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`
+- **Fund tx:** `0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`
+- **Source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
+- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 

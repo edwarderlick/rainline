@@ -16,9 +16,9 @@ export function NetworkBanner() {
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-error">
               Critical
             </p>
-            <p className="font-bold text-on-error-container">This app writes on StudioNet (chain 61999).</p>
+            <p className="font-bold text-on-error-container">This app writes on Studio Next (chain 61997).</p>
             <p className="text-sm text-on-error-container/80">
-              Switch your wallet to GenLayer StudioNet before buy_cover, fund_pool, cancel_cover,
+              Switch your wallet to GenLayer Studio Next before buy_cover, fund_pool, cancel_cover,
               resolve, or withdraw. Reads still work.
             </p>
             {error ? <p className="mt-1 text-xs text-on-error-container">{error}</p> : null}
@@ -29,7 +29,7 @@ export function NetworkBanner() {
           onClick={() => void switchNetwork()}
           className="shrink-0 border border-error bg-error px-6 py-3 font-mono text-[12px] uppercase tracking-wider text-on-error hover:bg-on-error-container"
         >
-          Switch to StudioNet
+          Switch to Studio Next
         </button>
       </div>
     </div>
@@ -43,7 +43,7 @@ export function MobileNetworkBanner() {
     <div className="fixed inset-x-4 bottom-24 z-40 flex items-center justify-between bg-error px-4 py-2 md:hidden">
       <span className="flex items-center gap-2 font-mono text-[12px] uppercase text-on-error">
         <Icon name="warning" className="text-[18px]" />
-        StudioNet (chain 61999)
+        Studio Next (chain 61997)
       </span>
       <button
         type="button"

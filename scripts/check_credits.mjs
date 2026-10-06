@@ -1,16 +1,18 @@
 import "dotenv/config";
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 
-const RPC = "https://studio.genlayer.com/api";
+const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
 const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS;
 const BUYER = createAccount(process.env.OPERATOR_PRIVATE_KEY).address;
 
 const chain = {
-  ...studionet,
+  ...studioDevnet,
+  id: 61997,
+  name: "GenLayer Studio Next",
   rpcUrls: { default: { http: [RPC] } },
 };
-const client = createClient({ chain, account: createAccount() });
+const client = createClient({ chain, endpoint: RPC, account: createAccount() });
 
 async function main() {
   const credit = await client.readContract({

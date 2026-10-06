@@ -14,7 +14,7 @@ export function WalletReviewerNote() {
   return (
     <p className="text-[15px] leading-[22px] text-on-surface-variant">
       Connect any EIP-1193 wallet (MetaMask, Rabby, Brave, Coinbase, Rainbow). The wallet must
-      accept a custom network: StudioNet, chain 61999, RPC studio.genlayer.com/api, symbol GEN.
+      accept a custom network: Studio Next, chain 61997, RPC studio-next.genlayer.com/api, symbol GEN.
       Get test GEN from the Studio faucet.
     </p>
   );

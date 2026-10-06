@@ -34,7 +34,7 @@ export function WalletModal() {
           <div>
             <h3 className="text-lg font-bold text-on-surface">Connect wallet</h3>
             <p className="mt-1 font-mono text-[12px] uppercase tracking-[0.05em] text-on-surface-variant">
-              StudioNet (chain 61999). Native GEN.
+              Studio Next (chain 61997). Native GEN.
             </p>
           </div>
           <button type="button" onClick={closeModal} className="text-on-surface-variant hover:text-primary">

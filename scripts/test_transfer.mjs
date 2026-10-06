@@ -1,9 +1,9 @@
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 import fs from "node:fs";
 
-const RPC = "https://studio.genlayer.com/api";
-const chain = { ...studionet, rpcUrls: { default: { http: [RPC] } } };
+const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
+const chain = { ...studioDevnet, id: 61997, name: "GenLayer Studio Next", rpcUrls: { default: { http: [RPC] } } };
 
 const code = `
 from genlayer import *
@@ -22,7 +22,7 @@ async function main() {
   const op = createAccount();
   console.log("Op:", op.address);
   
-  const client = createClient({ chain, account: op });
+  const client = createClient({ chain, endpoint: RPC, account: op });
   await fetch(RPC, {
     method: "POST",
     headers: { "content-type": "application/json" },

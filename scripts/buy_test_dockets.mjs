@@ -1,8 +1,8 @@
 /**
- * Buy three test cover dockets on StudioNet.
+ * Buy three test cover dockets on Studio Next.
  * 
- * Docket A: RAIN, Mumbai, low threshold (1mm) — expected PAY after resolve
- * Docket B: RAIN, Singapore, high threshold (500mm) — expected KEEP after resolve  
+ * Docket A: RAIN, Mumbai, valid threshold (25mm)
+ * Docket B: RAIN, Singapore, max valid threshold (100mm)
  * Docket C: RAIN, Mumbai, far past date — expected to test INSUFFICIENT
  *
  * Since buy_cover enforces a 24h cutoff, we buy for D+3 from now.
@@ -11,15 +11,17 @@
 
 import "dotenv/config";
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 
-const RPC = "https://studio.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x32CA2493A52297b69EA2AfF80B35696c3b97b53E";
+const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043";
 const OPERATOR_KEY = process.env.OPERATOR_PRIVATE_KEY;
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
 
 const chain = {
-  ...studionet,
+  ...studioDevnet,
+  id: 61997,
+  name: "GenLayer Studio Next",
   rpcUrls: { default: { http: [RPC] } },
 };
 
@@ -42,7 +44,7 @@ console.log("Buyer address:", buyerAccount.address);
 console.log("Funding buyer with 20 GEN...");
 await rpc("sim_fundAccount", [buyerAccount.address, Number(20n * 10n ** 18n)]);
 
-const buyerClient = createClient({ chain, account: buyerAccount });
+const buyerClient = createClient({ chain, endpoint: RPC, account: buyerAccount });
 
 // Future date: D+3 from now
 function futureDate(daysAhead) {
@@ -56,13 +58,13 @@ console.log(`\nTarget coverage date: ${targetDate} (D+3)`);
 console.log(`Buy cutoff: ${targetDate}T00:00:00Z minus 24h`);
 console.log(`Resolve opens: ${futureDate(4)}T00:00:00Z\n`);
 
-// ── Docket A: RAIN Mumbai, threshold 1mm (should PAY) ─────────
-console.log("=== Docket A: RAIN Mumbai, threshold=1mm (expect PAY) ===");
+// ── Docket A: RAIN Mumbai, threshold 25mm ─────────────────────
+console.log("=== Docket A: RAIN Mumbai, threshold=25mm ===");
 try {
   const hashA = await buyerClient.writeContract({
     address: CONTRACT,
     functionName: "buy_cover",
-    args: ["RAIN", "19.0760", "72.8777", targetDate, 1000],
+    args: ["RAIN", "19.0760", "72.8777", targetDate, 25000],
     value: PREMIUM,
   });
   console.log("buy_cover tx:", hashA);
@@ -85,13 +87,13 @@ try {
   console.error("Docket A error:", e.message);
 }
 
-// ── Docket B: RAIN Singapore, threshold 500mm (should KEEP) ───
-console.log("\n=== Docket B: RAIN Singapore, threshold=500mm (expect KEEP) ===");
+// ── Docket B: RAIN Singapore, threshold 100mm ─────────────────
+console.log("\n=== Docket B: RAIN Singapore, threshold=100mm ===");
 try {
   const hashB = await buyerClient.writeContract({
     address: CONTRACT,
     functionName: "buy_cover",
-    args: ["RAIN", "1.3521", "103.8198", targetDate, 500000],
+    args: ["RAIN", "1.3521", "103.8198", targetDate, 100000],
     value: PREMIUM,
   });
   console.log("buy_cover tx:", hashB);

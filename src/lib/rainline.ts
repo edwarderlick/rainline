@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 import { ExecutionResult, TransactionStatus } from "genlayer-js/types";
 import type { Address } from "viem";
 import {
@@ -10,13 +10,13 @@ import {
   type CoverState,
   type Pool,
 } from "./contract";
-import { hasContract, isStudioNetChain, type EthereumProvider } from "./genlayer";
+import { hasContract, isStudioNextChain, type EthereumProvider } from "./genlayer";
 import { getActiveProvider } from "./injected-wallets";
 import { jsonRpcEndpoint } from "./app-entry";
 
 export class WalletRequiredError extends Error {
   constructor() {
-    super("Connect a StudioNet wallet first.");
+    super("Connect a Studio Next wallet first.");
     this.name = "WalletRequiredError";
   }
 }
@@ -35,7 +35,9 @@ function contractAddress(): Address {
 
 function studioChain() {
   return {
-    ...studionet,
+    ...studioDevnet,
+    id: 61997,
+    name: "GenLayer Studio Next",
     rpcUrls: { default: { http: [jsonRpcEndpoint()] as const } },
   };
 }
@@ -43,7 +45,8 @@ function studioChain() {
 function readClient() {
   return createClient({
     chain: studioChain(),
-  });
+    endpoint: jsonRpcEndpoint(),
+  } as Parameters<typeof createClient>[0]);
 }
 
 function writeClient(account: Address) {
@@ -51,9 +54,10 @@ function writeClient(account: Address) {
   if (!provider) throw new WalletRequiredError();
   return createClient({
     chain: studioChain(),
+    endpoint: jsonRpcEndpoint(),
     account,
     provider: provider as EthereumProvider,
-  });
+  } as Parameters<typeof createClient>[0]);
 }
 
 export function formatError(err: unknown): string {
@@ -109,7 +113,7 @@ async function waitAndCheck(
     retries: 60,
   });
   const execution = receipt.txExecutionResultName ?? "UNKNOWN";
-  if (execution === ExecutionResult.FINISHED_WITH_ERROR) {
+  if (execution === ExecutionResult.FINISHED_WITH_ERROR || /ERROR|FAILED|ROLLBACK/i.test(execution)) {
     throw new Error(`Contract execution failed (${hash}). State was not modified.`);
   }
   return {
@@ -229,23 +233,29 @@ async function sendWrite(
   const provider = getActiveProvider();
   if (!provider) throw new WalletRequiredError();
   const current = (await provider.request({ method: "eth_chainId" })) as string;
-  if (!isStudioNetChain(current)) {
-    throw new Error("This app writes on StudioNet (chain 61999).");
+  if (!isStudioNextChain(current)) {
+    throw new Error("This app writes on Studio Next (chain 61997).");
   }
   const client = writeClient(addr);
   try {
     if (typeof window !== "undefined" && provider === (window as unknown as { ethereum?: EthereumProvider }).ethereum) {
-      await client.connect("studionet");
+      await client.connect("studioDevnet");
     }
   } catch {
     /* Snaps are MetaMask-only. Chain switch already happened on the selected provider. */
   }
+  const estimate = await client.estimateTransactionFees({
+    leaderTimeunitsAllocation: "100",
+    validatorTimeunitsAllocation: "200",
+  });
+  const fees = { distribution: estimate.distribution, feeValue: estimate.feeValue };
   const hash = asHash(
     await client.writeContract({
       address: contractAddress(),
       functionName,
       args: args as never,
       value,
+      fees,
     })
   );
   return waitAndCheck(hash, status);

@@ -9,5 +9,5 @@ export function jsonRpcEndpoint(): string {
   if (typeof window !== "undefined") {
     return `${window.location.origin}/api/genlayer`;
   }
-  return process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio.genlayer.com/api";
+  return process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio-next.genlayer.com/api";
 }

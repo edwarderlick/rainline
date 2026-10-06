@@ -1,5 +1,5 @@
 /**
- * Resolve the three test cover dockets on StudioNet.
+ * Resolve the three test cover dockets on Studio Next.
  *
  * NOTE: The contract strictly enforces resolution timing: 
  * "resolve only after the coverage day has closed".
@@ -11,16 +11,17 @@
  */
 
 import { createClient, createAccount } from "genlayer-js";
-import { studionet } from "genlayer-js/chains";
+import { studioDevnet } from "genlayer-js/chains";
 
-const RPC = "https://studio.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x32CA2493A52297b69EA2AfF80B35696c3b97b53E";
+const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043";
 
 // Any account can resolve
 const resolverAccount = createAccount();
 
 const client = createClient({ 
-  chain: { ...studionet, rpcUrls: { default: { http: [RPC] } } }, 
+  chain: { ...studioDevnet, id: 61997, name: "GenLayer Studio Next", rpcUrls: { default: { http: [RPC] } } },
+  endpoint: RPC,
   account: resolverAccount 
 });
 

@@ -2,14 +2,16 @@
 
 **Parametric Weather Cover on GenLayer**
 
-Rainline is a deterministic financial primitive built on GenLayer StudioNet. It replaces subjective "AI Courts" and prediction markets with a strict, numeric, and stateless cover mechanism. Buyers lock a premium against a fixed weather template (RAIN, DRY, HEAT). After the coverage day closes, validators extract a single numeric observation from a pinned Open-Meteo historical JSON endpoint. 
+Rainline is a deterministic financial primitive built on GenLayer Studio Next. It replaces subjective "AI Courts" and prediction markets with a strict, numeric, and stateless cover mechanism. Buyers lock a premium against a fixed weather template (RAIN, DRY, HEAT). After the coverage day closes, validators extract a single numeric observation from a pinned Open-Meteo historical JSON endpoint. 
 
 No subjective verdicts. No FOR/AGAINST books. No trapped GEN.
 
 ### 🌐 Live Links
 - **App:** [https://rainline-jet.vercel.app/](https://rainline-jet.vercel.app/)
-- **StudioNet Contract:** `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`
-- **Chain ID:** 61999
+- **Studio Next Contract:** `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`
+- **Chain ID:** 61997
+- **RPC:** `https://studio-next.genlayer.com/api`
+- **Explorer:** `https://explorer-studio-dev.genlayer.com`
 
 ---
 
@@ -45,8 +47,16 @@ Previous Intelligent Contract experiments highlighted the need for bulletproof m
 - **ID Custody & Retrieval:** An append-only registry is used for listing. Correlation IDs are explicitly derived from deterministic hashes that include strict parameters and a monotonic nonce to guarantee unique assignment and prevent collision during simultaneous traffic.
 - **No Custody Without Return:** Missing evidence (e.g., API 404, invalid coordinates) correctly triggers the `INSUFFICIENT` state, immediately refunding the buyer's premium.
 
-### ⚡ Live StudioNet Settlement Proof (Sept 6, 2026 Covers)
-Earlier live covers proved the `D+1` settlement path on StudioNet. The current hardened contract is `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+### ⚡ Live Settlement Proof (Sept 6, 2026 Covers)
+Earlier live covers proved the `D+1` settlement path. The current hardened Studio Next contract is `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+
+### Studio Next Deployment Proof (Oct 6, 2026)
+
+- **Contract:** `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`
+- **Deploy tx:** `0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`
+- **Fund tx:** `0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`
+- **Source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
+- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 
@@ -75,15 +85,17 @@ Earlier live covers proved the `D+1` settlement path on StudioNet. The current h
 
 2. **Environment Variables (`.env.local`)**
    ```env
-   NEXT_PUBLIC_GENLAYER_NETWORK=studionet
-   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x32CA2493A52297b69EA2AfF80B35696c3b97b53E
+   NEXT_PUBLIC_GENLAYER_NETWORK=studio-next
+   NEXT_PUBLIC_GENLAYER_CHAIN_ID=61997
+   NEXT_PUBLIC_GENLAYER_RPC_URL=https://studio-next.genlayer.com/api
+   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043
    ```
 
 3. **Run Development Server**
    ```bash
    npm run dev
    ```
-   *The app utilizes a same-origin API proxy (`/api/genlayer`) to bypass StudioNet CORS restrictions during local reads.*
+   *The app utilizes a same-origin API proxy (`/api/genlayer`) to bypass Studio Next CORS restrictions during local reads.*
 
 ## ⚠️ Limits & Honesty (Demo Scope)
 
