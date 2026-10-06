@@ -12,10 +12,11 @@ No subjective verdicts. No FOR/AGAINST books. No trapped GEN.
 - **Chain:** Studio Next `61997`
 - **RPC:** `https://studio-next.genlayer.com/api`
 - **Explorer:** [explorer-studio-dev.genlayer.com](https://explorer-studio-dev.genlayer.com/)
-- **Current contract:** [`0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`](https://explorer-studio-dev.genlayer.com/address/0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043)
-- **Deploy tx:** [`0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`](https://explorer-studio-dev.genlayer.com/tx/0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3)
-- **Fund tx:** [`0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`](https://explorer-studio-dev.genlayer.com/tx/0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353)
-- **Deployed source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
+- **Current contract:** [`0x23fFF100306713f69E677076eAfAAAd5E9FDf413`](https://explorer-studio-dev.genlayer.com/address/0x23fFF100306713f69E677076eAfAAAd5E9FDf413)
+- **Deploy tx:** [`0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19`](https://explorer-studio-dev.genlayer.com/tx/0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19)
+- **Fund tx:** [`0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd`](https://explorer-studio-dev.genlayer.com/tx/0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd)
+- **Live buy proof tx:** [`0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d`](https://explorer-studio-dev.genlayer.com/tx/0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d)
+- **Deployed source SHA-256:** `b14e03b044e99de38012644ce1c7d1e1d2c3823a35ddd1f57efdb884c1fa38bb`
 
 ---
 
@@ -44,7 +45,7 @@ graph TD
 Previous Intelligent Contract experiments highlighted the need for bulletproof money mechanics and strict objective boundaries. Rainline implements the following architectural strictures:
 
 - **Deterministic Execution (No Subjectivity):** The equivalence principle is strictly bound to numeric extraction (`precipitation_sum` or `temperature_2m_max`). There are no open-ended prose verdicts or party-supplied payout weights.
-- **Strict UTC Cutoffs (No Adverse Selection):** `buy_cover` utilizes `gl.message_raw["datetime"]` to enforce that all buys must be finalized 24 hours before the target day 00:00 UTC begins.
+- **Strict UTC Cutoffs (No Adverse Selection):** `buy_cover` uses the Studio Next VM timestamp, with message metadata as a compatibility fallback, to enforce that all buys must be finalized 24 hours before the target day 00:00 UTC begins.
 - **Underwriting Ranges (No Near-Certain Triggers):** RAIN thresholds must be 10-100 mm, DRY thresholds 0-1 mm, and HEAT thresholds 35-55 C. Unsafe thresholds revert before any premium is accepted.
 - **Event Exposure Cap:** A single template/location/date bucket can reserve at most 25% of the post-premium pool, preventing concentrated correlated weather exposure even when each individual cover is solvent.
 - **Pull-over-Push Fallback (No Trapped Funds):** Settlement credits are stored before withdrawal. If `withdraw()` cannot complete the native transfer, it restores the caller's credit and reverts instead of erasing funds.
@@ -52,15 +53,16 @@ Previous Intelligent Contract experiments highlighted the need for bulletproof m
 - **No Custody Without Return:** Missing evidence (e.g., API 404, invalid coordinates) correctly triggers the `INSUFFICIENT` state, immediately refunding the buyer's premium.
 
 ### ⚡ Live Settlement Proof (Sept 6, 2026 Covers)
-Earlier live covers proved the `D+1` settlement path. The current hardened Studio Next contract is `0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+Earlier live covers proved the `D+1` settlement path. The current hardened Studio Next contract is `0x23fFF100306713f69E677076eAfAAAd5E9FDf413`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
 
 ### Studio Next Deployment Proof (Oct 6, 2026)
 
-- **Contract:** [`0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`](https://explorer-studio-dev.genlayer.com/address/0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043)
-- **Deploy tx:** [`0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`](https://explorer-studio-dev.genlayer.com/tx/0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3)
-- **Fund tx:** [`0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`](https://explorer-studio-dev.genlayer.com/tx/0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353)
-- **Source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
-- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4.
+- **Contract:** [`0x23fFF100306713f69E677076eAfAAAd5E9FDf413`](https://explorer-studio-dev.genlayer.com/address/0x23fFF100306713f69E677076eAfAAAd5E9FDf413)
+- **Deploy tx:** [`0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19`](https://explorer-studio-dev.genlayer.com/tx/0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19)
+- **Fund tx:** [`0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd`](https://explorer-studio-dev.genlayer.com/tx/0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd)
+- **Live buy proof tx:** [`0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d`](https://explorer-studio-dev.genlayer.com/tx/0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d)
+- **Source SHA-256:** `b14e03b044e99de38012644ce1c7d1e1d2c3823a35ddd1f57efdb884c1fa38bb`
+- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4. The live buy proof created `cover-0xf79c61e606403dd51f90c4670888538322d9e81d541b85473f770312c07a019d` and reserved a 0.04 GEN payout.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 
@@ -92,7 +94,7 @@ Earlier live covers proved the `D+1` settlement path. The current hardened Studi
    NEXT_PUBLIC_GENLAYER_NETWORK=studio-next
    NEXT_PUBLIC_GENLAYER_CHAIN_ID=61997
    NEXT_PUBLIC_GENLAYER_RPC_URL=https://studio-next.genlayer.com/api
-   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043
+   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x23fFF100306713f69E677076eAfAAAd5E9FDf413
    ```
 
 3. **Run Development Server**

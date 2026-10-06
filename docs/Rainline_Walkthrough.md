@@ -12,11 +12,12 @@ An automated deployment script (`scripts/deploy_studio_next.mjs`) is used to int
 4. Verifies finalized successful execution and the source SHA-256.
 5. Calls `fund_pool` to seed the initial liquidity with **50 GEN**.
 
-The live contract address is: **[`0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`](https://explorer-studio-dev.genlayer.com/address/0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043)**
+The live contract address is: **[`0x23fFF100306713f69E677076eAfAAAd5E9FDf413`](https://explorer-studio-dev.genlayer.com/address/0x23fFF100306713f69E677076eAfAAAd5E9FDf413)**
 
-- **Deploy tx:** [`0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`](https://explorer-studio-dev.genlayer.com/tx/0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3)
-- **Fund tx:** [`0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`](https://explorer-studio-dev.genlayer.com/tx/0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353)
-- **Source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
+- **Deploy tx:** [`0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19`](https://explorer-studio-dev.genlayer.com/tx/0xcb638423bcafa33eb5f7fc5acba3ef4a6d6dd57e1d2e2a06f4fa0eb89fb0fc19)
+- **Fund tx:** [`0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd`](https://explorer-studio-dev.genlayer.com/tx/0x505a55c3c9e5dd0a66089a59af15d3f0cbffeb592edaec46698f27bb0b6df9dd)
+- **Live buy proof tx:** [`0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d`](https://explorer-studio-dev.genlayer.com/tx/0xd33cdb70c2d7038cb643e7171b947272c6e960422633d9978d101196478d604d)
+- **Source SHA-256:** `b14e03b044e99de38012644ce1c7d1e1d2c3823a35ddd1f57efdb884c1fa38bb`
 
 ### 2. Frontend Wiring
 The frontend was perfectly architected for the transition. All data-fetching layers in `src/lib/rainline.ts` were already utilizing the live SDK. The only change required was:

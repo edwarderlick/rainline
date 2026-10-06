@@ -8,6 +8,14 @@ from datetime import datetime, timedelta, timezone
 from genlayer import *
 import genlayer as gl
 try:
+    import genlayer.message as gl_message
+except ImportError:
+    gl_message = None
+try:
+    import genlayer.vm as gl_vm
+except ImportError:
+    gl_vm = None
+try:
     import genlayer.storage as genlayer_storage
     from genlayer.storage import DynArray, TreeMap
     allow_storage = genlayer_storage.allow
@@ -74,18 +82,58 @@ class Rainline(gl.contract.Contract):
         self.reserved_payout = u256(0)
         self.withdrawing = False
 
-    def _now(self) -> datetime:
+    def _raw_message_get(self, key: str, default):
         try:
-            raw = str(gl.message_raw["datetime"])
+            raw = getattr(gl, "message_raw", None)
+            if isinstance(raw, dict):
+                return raw.get(key, default)
         except Exception:
-            raise gl.vm.UserError(f"{ERROR_EXPECTED} missing datetime in message context")
-        text = raw.strip()
+            pass
+        try:
+            if gl_message is not None:
+                raw = getattr(gl_message, "raw", None)
+                if isinstance(raw, dict):
+                    return raw.get(key, default)
+        except Exception:
+            pass
+        return default
+
+    def _parse_datetime(self, raw) -> datetime:
+        if isinstance(raw, datetime):
+            dt = raw
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
+        text = str(raw or "").strip()
+        if not text:
+            raise ValueError("empty datetime")
+        if text.isdigit():
+            dt = datetime.fromtimestamp(int(text), tz=timezone.utc)
+            return dt.astimezone(timezone.utc)
         if text.endswith("Z"):
             text = text[:-1] + "+00:00"
         dt = datetime.fromisoformat(text)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc)
+
+    def _now(self) -> datetime:
+        errors = []
+        try:
+            if gl_vm is not None:
+                return self._parse_datetime(gl_vm.get_timestamp())
+        except Exception as exc:
+            errors.append(f"vm_module:{type(exc).__name__}:{str(exc)[:96]}")
+        try:
+            return self._parse_datetime(gl.vm.get_timestamp())
+        except Exception as exc:
+            errors.append(f"gl_vm:{type(exc).__name__}:{str(exc)[:96]}")
+        try:
+            return self._parse_datetime(self._raw_message_get("datetime", ""))
+        except Exception as exc:
+            errors.append(f"message:{type(exc).__name__}:{str(exc)[:96]}")
+            details = "; ".join(errors)
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} transaction time unavailable ({details})")
 
     def _parse_date(self, value: str) -> datetime:
         if not DATE_RE.match(value or ""):
@@ -210,8 +258,9 @@ class Rainline(gl.contract.Contract):
         if event_exposure > max_event_exposure:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} event exposure limit exceeded")
 
-        nonce = str(gl.message_raw.get("nonce", ""))
-        hash_input = f"{gl.message.sender_address}-{now}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{nonce}"
+        nonce = str(self._raw_message_get("nonce", ""))
+        created_at = now.isoformat()
+        hash_input = f"{gl.message.sender_address}-{created_at}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{nonce}"
         try:
             # Try GenLayer keccak if available
             digest = gl.keccak256(hash_input.encode("utf-8")).hex()
@@ -243,7 +292,7 @@ class Rainline(gl.contract.Contract):
             evidence_url=url,
             result_json="",
             observed_milli="",
-            created_at=str(gl.message_raw.get("datetime", "")),
+            created_at=created_at,
         )
         return cover_id
 

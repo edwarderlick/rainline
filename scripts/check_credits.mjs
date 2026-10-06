@@ -1,10 +1,23 @@
-import "dotenv/config";
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createClient, createAccount } from "genlayer-js";
 import { studioDevnet } from "genlayer-js/chains";
 
+const root = resolve(import.meta.dirname, "..");
+for (const envFile of [".env.local", ".env"]) {
+  const envPath = resolve(root, envFile);
+  if (!existsSync(envPath)) continue;
+  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match && !process.env[match[1].trim()]) {
+      process.env[match[1].trim()] = match[2].trim();
+    }
+  }
+}
+
 const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
 const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS;
-const BUYER = createAccount(process.env.OPERATOR_PRIVATE_KEY).address;
+const BUYER = process.env.BUYER_ADDRESS || (process.env.OPERATOR_PRIVATE_KEY ? createAccount(process.env.OPERATOR_PRIVATE_KEY).address : "");
 
 const chain = {
   ...studioDevnet,
@@ -15,6 +28,8 @@ const chain = {
 const client = createClient({ chain, endpoint: RPC, account: createAccount() });
 
 async function main() {
+  if (!CONTRACT) throw new Error("NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS is required");
+  if (!BUYER) throw new Error("Set BUYER_ADDRESS or OPERATOR_PRIVATE_KEY");
   const credit = await client.readContract({
     address: CONTRACT,
     functionName: "get_credit",

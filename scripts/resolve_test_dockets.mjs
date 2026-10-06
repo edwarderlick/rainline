@@ -10,11 +10,26 @@
  * resolution once the dates actually pass.
  */
 
+import { readFileSync, existsSync } from "node:fs";
+import { resolve as resolvePath } from "node:path";
 import { createClient, createAccount } from "genlayer-js";
 import { studioDevnet } from "genlayer-js/chains";
 
+const root = resolvePath(import.meta.dirname, "..");
+for (const envFile of [".env.local", ".env"]) {
+  const envPath = resolvePath(root, envFile);
+  if (!existsSync(envPath)) continue;
+  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match && !process.env[match[1].trim()]) {
+      process.env[match[1].trim()] = match[2].trim();
+    }
+  }
+}
+
 const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043";
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x23fFF100306713f69E677076eAfAAAd5E9FDf413";
+const profile = JSON.parse(readFileSync(resolvePath(root, "fee-profile.json"), "utf8"));
 
 // Any account can resolve
 const resolverAccount = createAccount();
@@ -24,6 +39,11 @@ const client = createClient({
   endpoint: RPC,
   account: resolverAccount 
 });
+const feeEstimate = await client.estimateTransactionFees({
+  leaderTimeunitsAllocation: profile.methods.write.leaderTimeunitsAllocation,
+  validatorTimeunitsAllocation: profile.methods.write.validatorTimeunitsAllocation,
+});
+const writeFees = { distribution: feeEstimate.distribution, feeValue: feeEstimate.feeValue };
 
 async function rpc(method, params) {
   const res = await fetch(RPC, {
@@ -48,6 +68,7 @@ async function resolve(coverId) {
       functionName: "resolve",
       args: [coverId],
       value: 0n,
+      fees: writeFees,
     });
     console.log(`${coverId} resolve tx:`, hash);
     const receipt = await client.waitForTransactionReceipt({

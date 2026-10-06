@@ -9,14 +9,27 @@
  * Resolution will be possible after D+1 00:00 UTC.
  */
 
-import "dotenv/config";
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createClient, createAccount } from "genlayer-js";
 import { studioDevnet } from "genlayer-js/chains";
 
+const root = resolve(import.meta.dirname, "..");
+for (const envFile of [".env.local", ".env"]) {
+  const envPath = resolve(root, envFile);
+  if (!existsSync(envPath)) continue;
+  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^([^#=]+)=(.*)$/);
+    if (match && !process.env[match[1].trim()]) {
+      process.env[match[1].trim()] = match[2].trim();
+    }
+  }
+}
+
 const RPC = process.env.GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api";
-const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043";
-const OPERATOR_KEY = process.env.OPERATOR_PRIVATE_KEY;
+const CONTRACT = process.env.NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS || "0x23fFF100306713f69E677076eAfAAAd5E9FDf413";
 const PREMIUM = 1n * 10n ** 18n; // 1 GEN
+const profile = JSON.parse(readFileSync(resolve(root, "fee-profile.json"), "utf8"));
 
 const chain = {
   ...studioDevnet,
@@ -45,6 +58,11 @@ console.log("Funding buyer with 20 GEN...");
 await rpc("sim_fundAccount", [buyerAccount.address, Number(20n * 10n ** 18n)]);
 
 const buyerClient = createClient({ chain, endpoint: RPC, account: buyerAccount });
+const feeEstimate = await buyerClient.estimateTransactionFees({
+  leaderTimeunitsAllocation: profile.methods.write.leaderTimeunitsAllocation,
+  validatorTimeunitsAllocation: profile.methods.write.validatorTimeunitsAllocation,
+});
+const writeFees = { distribution: feeEstimate.distribution, feeValue: feeEstimate.feeValue };
 
 // Future date: D+3 from now
 function futureDate(daysAhead) {
@@ -66,6 +84,7 @@ try {
     functionName: "buy_cover",
     args: ["RAIN", "19.0760", "72.8777", targetDate, 25000],
     value: PREMIUM,
+    fees: writeFees,
   });
   console.log("buy_cover tx:", hashA);
   const receiptA = await buyerClient.waitForTransactionReceipt({
@@ -95,6 +114,7 @@ try {
     functionName: "buy_cover",
     args: ["RAIN", "1.3521", "103.8198", targetDate, 100000],
     value: PREMIUM,
+    fees: writeFees,
   });
   console.log("buy_cover tx:", hashB);
   const receiptB = await buyerClient.waitForTransactionReceipt({
@@ -123,6 +143,7 @@ try {
     functionName: "buy_cover",
     args: ["HEAT", "19.0760", "72.8777", dateC, 35000],
     value: PREMIUM,
+    fees: writeFees,
   });
   console.log("buy_cover tx:", hashC);
   const receiptC = await buyerClient.waitForTransactionReceipt({
