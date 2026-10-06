@@ -48,6 +48,7 @@ export type Pool = {
   reserved_payout: number;
   unreserved: number;
   payout_ratio: number;
+  max_event_exposure_bps: number;
   source_host: string;
   buy_cutoff_hours: number;
 };

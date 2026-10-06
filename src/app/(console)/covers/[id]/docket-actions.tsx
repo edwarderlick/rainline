@@ -77,9 +77,9 @@ export function DocketActions({
           <span>{busy === "resolve" ? "resolve pending" : "resolve"}</span>
           <Icon name={canResolve ? "bolt" : "lock"} />
         </button>
-        {note.includes("native transfer failed") ? (
+        {note.includes("native transfer failed") || note.includes("credit restored") ? (
           <div className="flex w-full items-center justify-between border border-[#8B4513] bg-[#E9967A] px-4 py-3 text-left text-sm font-semibold text-white">
-            <span>⚠️ StudioNet native transfer failed. Payout secured in contract credits. Use fallback withdrawal (coming soon).</span>
+            <span>StudioNet native transfer failed. Contract credit was restored; retry withdraw after the network settles.</span>
           </div>
         ) : (
           <button

@@ -14,11 +14,13 @@ Rainline is a parametric weather cover primitive designed specifically to highli
 Rainline was built to avoid the pitfalls of subjective "AI Courts" and prediction markets:
 * **ID Custody & Retrieval:** An append-only registry is used for listing. Correlation IDs are explicitly derived from deterministic hashes that include strict parameters and a monotonic nonce to guarantee unique assignment and prevent collision during simultaneous traffic.
 * **Party weights:** There is no FOR/AGAINST market mechanic. Payouts are fixed at a 4x ratio and strictly reserved from pre-funded pool liquidity at the moment of purchase, mathematically preventing insolvency.
+* **Underwriting and exposure controls:** Buyers cannot choose near-certain thresholds. RAIN must be 10-100 mm, DRY must be 0-1 mm, and HEAT must be 35-55 C. Each template/location/date bucket is also capped at 25% of the post-premium pool, so repeated buys cannot concentrate correlated exposure into one weather event.
+* **Withdrawal safety:** `withdraw()` now restores credit and reverts if the native transfer fails. A failed transfer no longer zeroes the caller's credit.
 * **Subjective labels:** Rainline enforces purely numeric comparisons. "Did it rain heavily?" is replaced with "Was `precipitation_sum >= 5000`?"
 * **UI Mechanics match Contract:** The UI explicitly states that there is no human keeper and no appeals process. The frontend perfectly maps to the contract's fixed methods (`buy_cover`, `cancel_cover`, `resolve`), ensuring users are never promised non-existent on-chain functionality.
 
 ### ⚡ Live StudioNet Settlement Proof (Sept 6, 2026 Covers)
-The `D+1` time lock expired natively on the live contract. The following resolutions were executed successfully on the hardened Pull-Payment architecture (Contract: `0x2079fF079758e99cdcB4D9748542CAA02596Af6b`), proving exact balance accounting and deterministic Oracle evaluation:
+Earlier live covers proved the `D+1` settlement path on StudioNet. The current hardened contract is `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 

@@ -22,6 +22,13 @@ PAYOUT_RATIO = 4
 MIN_PREMIUM_WEI = u256(10**16)
 MAX_PREMIUM_WEI = u256(10 * 10**18)
 BUY_CUTOFF_HOURS = 24
+EXPOSURE_BPS_DENOMINATOR = 10000
+MAX_EVENT_EXPOSURE_BPS = 2500
+UNDERWRITING_LIMITS = {
+    "RAIN": (10000, 100000),
+    "DRY": (0, 1000),
+    "HEAT": (35000, 55000),
+}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -70,6 +77,7 @@ class Rainline(gl.Contract):
     reserved_payout: u256
     covers: TreeMap[str, Cover]
     credits: TreeMap[Address, u256]
+    event_exposure: TreeMap[str, u256]
     cover_list: DynArray[str]
     withdrawing: bool
 
@@ -123,6 +131,25 @@ class Rainline(gl.Contract):
         current = self.credits.get(recipient, u256(0))
         self.credits[recipient] = current + amount
 
+    def _risk_key(self, template: str, lat: str, lon: str, coverage_date: str) -> str:
+        return f"{template}:{lat}:{lon}:{coverage_date}"
+
+    def _validate_underwriting(self, template: str, threshold: u256) -> None:
+        lo, hi = UNDERWRITING_LIMITS[template]
+        threshold_i = int(threshold)
+        if threshold_i < lo or threshold_i > hi:
+            raise gl.vm.UserError(
+                f"{ERROR_EXPECTED} threshold outside underwriting range for {template}"
+            )
+
+    def _release_exposure(self, cover: Cover) -> None:
+        key = self._risk_key(cover.template, cover.lat, cover.lon, cover.coverage_date)
+        current = self.event_exposure.get(key, u256(0))
+        if current < cover.payout:
+            self.event_exposure[key] = u256(0)
+        else:
+            self.event_exposure[key] = current - cover.payout
+
     def _extract_observation(self, payload: dict, coverage_date: str, template: str) -> int:
         daily = payload.get("daily") if isinstance(payload, dict) else None
         if not isinstance(daily, dict):
@@ -171,6 +198,7 @@ class Rainline(gl.Contract):
         threshold = u256(int(threshold_milli))
         if threshold == u256(0) and template != "DRY":
             raise gl.vm.UserError(f"{ERROR_EXPECTED} threshold must be > 0")
+        self._validate_underwriting(template, threshold)
 
         lat_s = self._fmt_coord(lat, "lat")
         lon_s = self._fmt_coord(lon, "lon")
@@ -189,6 +217,13 @@ class Rainline(gl.Contract):
         if available + premium < payout:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} pool cannot reserve payout")
 
+        risk_key = self._risk_key(template, lat_s, lon_s, coverage_date)
+        event_exposure = self.event_exposure.get(risk_key, u256(0)) + payout
+        post_premium_pool = self.pool_balance + premium
+        max_event_exposure = (post_premium_pool * u256(MAX_EVENT_EXPOSURE_BPS)) // u256(EXPOSURE_BPS_DENOMINATOR)
+        if event_exposure > max_event_exposure:
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} event exposure limit exceeded")
+
         nonce = str(gl.message_raw.get("nonce", ""))
         hash_input = f"{gl.message.sender_address}-{now}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{nonce}"
         try:
@@ -205,6 +240,7 @@ class Rainline(gl.Contract):
 
         self.pool_balance = self.pool_balance + premium
         self.reserved_payout = self.reserved_payout + payout
+        self.event_exposure[risk_key] = event_exposure
 
         url = self._evidence_url(lat_s, lon_s, coverage_date, template)
         self.covers[cover_id] = Cover(
@@ -250,6 +286,7 @@ class Rainline(gl.Contract):
         self.covers[cover_id] = cover
         self.pool_balance = self.pool_balance - cover.premium
         self.reserved_payout = self.reserved_payout - cover.payout
+        self._release_exposure(cover)
         CoverCanceled(cover_id).emit()
         self._pay(cover.buyer, cover.premium)
 
@@ -382,16 +419,19 @@ Do not invent a value if the field is missing or null.
             amount_wei = int(cover.payout)
             self.pool_balance = self.pool_balance - cover.payout
             self.reserved_payout = self.reserved_payout - cover.payout
+            self._release_exposure(cover)
         elif status == "KEEP":
             cover.state = "RESOLVED_KEEP"
             amount_wei = 0
             self.reserved_payout = self.reserved_payout - cover.payout
+            self._release_exposure(cover)
         else:
             status = "INSUFFICIENT"
             cover.state = "INSUFFICIENT"
             amount_wei = int(cover.premium)
             self.pool_balance = self.pool_balance - cover.premium
             self.reserved_payout = self.reserved_payout - cover.payout
+            self._release_exposure(cover)
 
         cover.observed_milli = "" if observed_milli is None else str(int(observed_milli))
         cover.result_json = json.dumps(
@@ -434,7 +474,9 @@ Do not invent a value if the field is missing or null.
         try:
             gl.get_contract_at(Address(str(caller))).emit_transfer(value=amount)
         except Exception:
-            pass
+            self.credits[caller] = amount
+            self.withdrawing = False
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} withdrawal transfer failed; credit restored")
             
         self.withdrawing = False
 
@@ -486,6 +528,7 @@ Do not invent a value if the field is missing or null.
             "reserved_payout": int(self.reserved_payout),
             "unreserved": int(self.pool_balance - self.reserved_payout),
             "payout_ratio": PAYOUT_RATIO,
+            "max_event_exposure_bps": MAX_EVENT_EXPOSURE_BPS,
             "source_host": SOURCE_HOST,
             "buy_cutoff_hours": BUY_CUTOFF_HOURS,
         }

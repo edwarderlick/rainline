@@ -12,12 +12,15 @@ from contracts.rainline_logic import (
     consensus_payload,
     decide_status,
     evidence_url,
+    event_exposure_allowed,
     extract_observation,
     extra_reserve,
     format_coord,
+    max_event_exposure,
     parse_coverage_date,
     parse_iso_datetime,
     payout_amount,
+    validate_underwriting,
 )
 
 
@@ -85,6 +88,22 @@ def test_payout_ratio_and_reserve():
     premium = 10**18
     assert payout_amount(premium) == 4 * 10**18
     assert extra_reserve(premium) == 3 * 10**18
+
+
+def test_underwriting_rejects_near_certain_thresholds():
+    assert validate_underwriting("RAIN", 10000)
+    assert not validate_underwriting("RAIN", 1)
+    assert validate_underwriting("DRY", 1000)
+    assert not validate_underwriting("DRY", 50000)
+    assert validate_underwriting("HEAT", 35000)
+    assert not validate_underwriting("HEAT", 20000)
+
+
+def test_event_exposure_cap_is_pool_relative():
+    pool_after_premium = 41 * 10**18
+    assert max_event_exposure(pool_after_premium) == 1025 * 10**16
+    assert event_exposure_allowed(pool_after_premium, 4 * 10**18, 4 * 10**18)
+    assert not event_exposure_allowed(pool_after_premium, 8 * 10**18, 4 * 10**18)
 
 
 def test_coords_normalized():

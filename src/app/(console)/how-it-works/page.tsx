@@ -39,7 +39,7 @@ export default function HowItWorksPage() {
               <h3 className="mb-2 text-2xl font-semibold">Fund the pool</h3>
               <p className="mb-4 text-[15px] leading-[22px] text-on-surface-variant">
                 Anyone calls <span className="font-mono">fund_pool()</span>. Buys revert unless
-                unreserved liquidity can cover a {PAYOUT_RATIO}× payout.
+                unreserved liquidity can cover a {PAYOUT_RATIO}× payout and the event cap.
               </p>
               <div className="border border-outline/50 bg-surface p-2 font-mono text-[12px] uppercase tracking-[0.05em] text-tertiary">
                 Status: awaiting deposit
@@ -53,7 +53,7 @@ export default function HowItWorksPage() {
               <h3 className="mb-2 text-2xl font-semibold">Parameter selection</h3>
               <p className="mb-4 text-[15px] leading-[22px] text-on-surface-variant">
                 RAIN / DRY / HEAT, latitude, longitude, a UTC coverage day, threshold, and
-                premium. Buyers cannot paste an evidence URL.
+                premium. Thresholds must stay inside the contract's underwriting range.
               </p>
               <div className="flex justify-between border border-outline/50 bg-surface p-2 font-mono text-[12px] uppercase tracking-[0.05em] text-tertiary">
                 <span>Rain / Dry / Heat</span>
@@ -70,7 +70,8 @@ export default function HowItWorksPage() {
             <h3 className="mb-2 text-2xl font-semibold">Buy refusal logic</h3>
             <p className="max-w-xl text-[15px] leading-[22px] text-on-surface-variant">
               The contract refuses the buy if the pool cannot reserve {PAYOUT_RATIO}× or if the
-              clock is inside D minus 24 hours.
+              clock is inside D minus 24 hours. It also refuses unsafe thresholds and same-event
+              exposure above 25% of the post-premium pool.
             </p>
             <div className="mt-6 flex flex-col gap-2 border border-outline/30 bg-surface p-4">
               <span className="font-mono text-[11px] text-on-surface">
@@ -78,6 +79,9 @@ export default function HowItWorksPage() {
               </span>
               <span className="font-mono text-[11px] text-on-surface">
                 2. Attempting to buy within 24h of target date.
+              </span>
+              <span className="font-mono text-[11px] text-on-surface">
+                3. Threshold or event exposure fails underwriting.
               </span>
             </div>
           </div>
@@ -117,7 +121,7 @@ export default function HowItWorksPage() {
             <h3 className="mb-2 text-2xl font-semibold">Payout / refund</h3>
             <p className="mb-6 text-[15px] leading-[22px] text-on-surface-variant">
               Recipients and amounts come from contract storage. If native send fails, funds
-              credit for <span className="font-mono">withdraw()</span>.
+              remain credited for <span className="font-mono">withdraw()</span>.
             </p>
             <div className="space-y-3">
               <div className="flex items-center justify-between border border-secondary bg-secondary/10 p-3">

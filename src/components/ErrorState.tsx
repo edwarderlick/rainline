@@ -24,11 +24,11 @@ export function PoolCapacityError() {
         <span className="inline-block border border-secondary-fixed-dim bg-secondary-fixed px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-on-secondary-fixed">
           Rejected
         </span>
-        <h3 className="text-2xl font-semibold">Pool cannot reserve 4× payout</h3>
+        <h3 className="text-2xl font-semibold">Pool cannot accept this cover</h3>
         <p className="text-on-surface-variant">
-          Buys revert unless unreserved liquidity plus the premium can cover a 4× payout. Fund
-          the pool with <span className="font-mono">fund_pool()</span> after deploy. No invented
-          reserve figure is shown here.
+          Buys revert unless liquidity can cover the payout and the same event stays inside the
+          exposure cap. Fund the pool with <span className="font-mono">fund_pool()</span> after
+          deploy. No invented reserve figure is shown here.
         </p>
       </div>
     </div>

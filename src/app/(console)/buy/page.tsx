@@ -11,6 +11,7 @@ import {
   buyDeadlineIso,
   genToWei,
   toMilli,
+  validateThreshold,
 } from "@/lib/templates";
 import { CITIES, evidenceUrl } from "@/lib/demo";
 import { hasContract } from "@/lib/genlayer";
@@ -53,6 +54,7 @@ export default function BuyPage() {
   const deadline = useMemo(() => buyDeadlineIso(date), [date]);
   const windowClosed = useMemo(() => new Date(deadline).getTime() <= Date.now(), [deadline]);
   const localUrl = evidenceUrl(city.lat, city.lon, date, template);
+  const thresholdError = validateThreshold(template, threshold);
 
   useEffect(() => {
     let alive = true;
@@ -75,6 +77,9 @@ export default function BuyPage() {
       const wei = genToWei(premium);
       if (Number(premium) < MIN_PREMIUM || Number(premium) > MAX_PREMIUM) {
         throw new Error(`premium must be ${MIN_PREMIUM}-${MAX_PREMIUM} GEN`);
+      }
+      if (thresholdError) {
+        throw new Error(thresholdError);
       }
       if (windowClosed) {
         setNote("buy_cover reverts: buy window closed 24h before coverage date 00:00 UTC.");
@@ -246,6 +251,9 @@ export default function BuyPage() {
               onChange={(e) => setThreshold(e.target.value)}
               className="w-full border border-outline bg-surface p-2 font-mono text-[12px]"
             />
+            <span className="mt-1 block font-mono text-[10px] uppercase tracking-wider text-outline">
+              Range {current.minThreshold}-{current.maxThreshold} {current.unit}
+            </span>
           </label>
           <label className="block">
             <span className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-outline">
@@ -293,7 +301,7 @@ export default function BuyPage() {
         </div>
 
         <p className="font-mono text-[10px] text-error">
-          Buy deadline: {deadline} (D minus {BUY_CUTOFF_HOURS}h)
+          {thresholdError ?? `Buy deadline: ${deadline} (D minus ${BUY_CUTOFF_HOURS}h)`}
         </p>
 
         {windowClosed ? <BuyWindowClosed deadline={deadline} /> : null}
@@ -301,7 +309,7 @@ export default function BuyPage() {
         <button
           type="button"
           onClick={() => void onBuy()}
-          disabled={busy || windowClosed || Boolean(wallet.writesBlocked)}
+          disabled={busy || windowClosed || Boolean(wallet.writesBlocked) || Boolean(thresholdError)}
           className="relative flex w-full items-center justify-center gap-2 border border-outline bg-surface py-3 font-mono text-[12px] uppercase tracking-wider hover:border-primary hover:bg-primary hover:text-on-primary disabled:opacity-50"
         >
           {busy ? "buy_cover pending" : "buy_cover"}

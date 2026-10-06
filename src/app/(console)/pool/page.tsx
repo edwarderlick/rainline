@@ -108,7 +108,7 @@ export default function PoolPage() {
       <div className="relative overflow-hidden border border-outline bg-surface-container p-4">
         <p className="text-[15px] leading-[22px] text-on-surface-variant">
           Anyone can call <span className="font-mono">fund_pool()</span>. Buys revert if
-          unreserved liquidity cannot cover a {PAYOUT_RATIO}x payout. Operator can only
+          unreserved liquidity cannot cover a {PAYOUT_RATIO}x payout or the event cap. Operator can only
           call <span className="font-mono">withdraw_unreserved</span>. Live figures come from{" "}
           <span className="font-mono">get_pool</span>. No invented GEN.
         </p>
@@ -128,6 +128,12 @@ export default function PoolPage() {
               <span className="font-mono text-[12px] uppercase text-on-surface-variant">Available</span>
               <div className="text-2xl font-semibold">
                 {pool ? `${weiToGen(pool.unreserved)} GEN` : "n/a"}
+              </div>
+            </div>
+            <div>
+              <span className="font-mono text-[12px] uppercase text-on-surface-variant">Event cap</span>
+              <div className="text-2xl font-semibold">
+                {pool ? `${pool.max_event_exposure_bps / 100}%` : "n/a"}
               </div>
             </div>
           </div>

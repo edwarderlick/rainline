@@ -144,7 +144,8 @@ export default function DocsPage() {
               <div className="bg-surface p-4 md:w-2/3">
                 <p className="text-[15px] leading-[22px] text-on-surface-variant">
                   Payout is reserved from the pool at buy time. There is no pro-rata shortfall
-                  path and no queue. The buy reverts if the reserve cannot be made.
+                  path and no queue. The buy reverts if the reserve cannot be made, the threshold
+                  is outside underwriting range, or the same event exceeds the exposure cap.
                 </p>
               </div>
             </div>
@@ -154,8 +155,8 @@ export default function DocsPage() {
               </div>
               <div className="bg-surface p-4 md:w-2/3">
                 <p className="text-[15px] leading-[22px] text-on-surface-variant">
-                  If emit_transfer fails, funds credit the recipient for withdraw(). No flights.
-                  No custom policy text. No keeper. No appeals.
+                  If emit_transfer fails during withdraw(), the contract restores the exact credit
+                  and reverts. No flights. No custom policy text. No keeper. No appeals.
                 </p>
               </div>
             </div>

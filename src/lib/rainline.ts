@@ -157,6 +157,7 @@ export async function readPool(): Promise<Pool | null> {
       reserved_payout: 0,
       unreserved: 0,
       payout_ratio: 4,
+      max_event_exposure_bps: 2500,
       source_host: "",
       buy_cutoff_hours: 24,
     };
@@ -173,6 +174,7 @@ export async function readPool(): Promise<Pool | null> {
     reserved_payout: Number(raw.reserved_payout),
     unreserved: Number(raw.unreserved),
     payout_ratio: Number(raw.payout_ratio),
+    max_event_exposure_bps: Number(raw.max_event_exposure_bps ?? 2500),
     source_host: String(raw.source_host),
     buy_cutoff_hours: Number(raw.buy_cutoff_hours),
   };

@@ -8,7 +8,7 @@ No subjective verdicts. No FOR/AGAINST books. No trapped GEN.
 
 ### 🌐 Live Links
 - **App:** [https://rainline-jet.vercel.app/](https://rainline-jet.vercel.app/)
-- **StudioNet Contract:** `0x2079fF079758e99cdcB4D9748542CAA02596Af6b`
+- **StudioNet Contract:** `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`
 - **Chain ID:** 61999
 
 ---
@@ -20,7 +20,7 @@ Rainline executes deterministically based on public API fetching and consensus.
 ```mermaid
 graph TD
     A[Buyer] -->|buy_cover + Premium| B(Rainline Pool)
-    B -->|Reserves 4x Payout| C{Coverage Day D}
+    B -->|Underwrites threshold + exposure cap| C{Coverage Day D}
     C -->|Wait for Day Close D+1| D[Anyone calls resolve]
     D --> E[Validators fetch Open-Meteo JSON]
     E --> F[LLM Extracts Numeric Value]
@@ -28,7 +28,7 @@ graph TD
     F -->|Observation < Threshold| H[RESOLVED_KEEP: Pool keeps premium]
     F -->|API Error / Missing Data| I[INSUFFICIENT: Premium refunded]
     
-    G -.->|If native emit_transfer fails| J[credits mapping updated]
+    G -.->|If native emit_transfer fails| J[credits preserved]
     I -.->|If native emit_transfer fails| J
     J --> K[Buyer calls withdraw]
 ```
@@ -39,12 +39,14 @@ Previous Intelligent Contract experiments highlighted the need for bulletproof m
 
 - **Deterministic Execution (No Subjectivity):** The equivalence principle is strictly bound to numeric extraction (`precipitation_sum` or `temperature_2m_max`). There are no open-ended prose verdicts or party-supplied payout weights.
 - **Strict UTC Cutoffs (No Adverse Selection):** `buy_cover` utilizes `gl.message_raw["datetime"]` to enforce that all buys must be finalized 24 hours before the target day 00:00 UTC begins.
-- **Pull-over-Push Fallback (No Trapped Funds):** If `emit_transfer` fails on StudioNet (a known EVM quirk with ghost contracts), the contract traps the falsy return and securely routes the exact `amount_wei` to a `credits` mapping for the user to manually `withdraw()`.
+- **Underwriting Ranges (No Near-Certain Triggers):** RAIN thresholds must be 10-100 mm, DRY thresholds 0-1 mm, and HEAT thresholds 35-55 C. Unsafe thresholds revert before any premium is accepted.
+- **Event Exposure Cap:** A single template/location/date bucket can reserve at most 25% of the post-premium pool, preventing concentrated correlated weather exposure even when each individual cover is solvent.
+- **Pull-over-Push Fallback (No Trapped Funds):** Settlement credits are stored before withdrawal. If `withdraw()` cannot complete the native transfer, it restores the caller's credit and reverts instead of erasing funds.
 - **ID Custody & Retrieval:** An append-only registry is used for listing. Correlation IDs are explicitly derived from deterministic hashes that include strict parameters and a monotonic nonce to guarantee unique assignment and prevent collision during simultaneous traffic.
 - **No Custody Without Return:** Missing evidence (e.g., API 404, invalid coordinates) correctly triggers the `INSUFFICIENT` state, immediately refunding the buyer's premium.
 
 ### ⚡ Live StudioNet Settlement Proof (Sept 6, 2026 Covers)
-The `D+1` time lock expired natively on the live contract. The following resolutions were executed successfully on the hardened Pull-Payment architecture (Contract: `0x2079fF079758e99cdcB4D9748542CAA02596Af6b`), proving exact balance accounting and deterministic Oracle evaluation:
+Earlier live covers proved the `D+1` settlement path on StudioNet. The current hardened contract is `0x32CA2493A52297b69EA2AfF80B35696c3b97b53E`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 
@@ -74,7 +76,7 @@ The `D+1` time lock expired natively on the live contract. The following resolut
 2. **Environment Variables (`.env.local`)**
    ```env
    NEXT_PUBLIC_GENLAYER_NETWORK=studionet
-   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x2079fF079758e99cdcB4D9748542CAA02596Af6b
+   NEXT_PUBLIC_RAINLINE_CONTRACT_ADDRESS=0x32CA2493A52297b69EA2AfF80B35696c3b97b53E
    ```
 
 3. **Run Development Server**

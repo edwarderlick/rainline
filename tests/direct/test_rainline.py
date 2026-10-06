@@ -51,6 +51,23 @@ def test_buy_validations(direct_vm, deployed, direct_alice):
     with pytest.raises(Exception, match="template"):
         deployed.buy_cover("FLIGHT", "19.076", "72.8777", "2026-09-10", 25000)
 
+    with pytest.raises(Exception, match="underwriting range"):
+        deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 1)
+
+
+def test_event_exposure_limit_rejects_concentrated_risk(direct_vm, deployed, direct_alice):
+    direct_vm.sender = direct_alice
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 9, 1, tzinfo=timezone.utc)
+
+    direct_vm.value = 10**18
+    deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 25000)
+    deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 25000)
+    with pytest.raises(Exception, match="event exposure limit exceeded"):
+        deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 25000)
+
+    deployed._instance._now = real_now
+
 
 def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
@@ -192,3 +209,39 @@ def test_operator_cannot_drain_reserved(direct_vm, deployed, direct_alice):
     pool = deployed.get_pool()
     with pytest.raises(Exception, match="unreserved"):
         deployed.withdraw_unreserved(pool["pool_balance"])
+
+
+def test_failed_withdraw_restores_credit(direct_vm, deployed, direct_alice):
+    direct_vm.sender = direct_alice
+    direct_vm.value = 10**18
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 11, 10, tzinfo=timezone.utc)
+    cover_id = deployed.buy_cover("RAIN", "51.5074", "-0.1278", "2026-12-01", 25000)
+    deployed.cancel_cover(cover_id)
+    deployed._instance._now = real_now
+
+    assert deployed.get_credit(direct_alice) == 10**18
+    with pytest.raises(Exception, match="credit restored"):
+        deployed.withdraw()
+    assert deployed.get_credit(direct_alice) == 10**18
+
+
+def test_successful_withdraw_clears_credit(direct_vm, deployed, direct_alice, monkeypatch):
+    import contracts.rainline as rainline_contract
+
+    class TransferSink:
+        def emit_transfer(self, value):
+            self.value = value
+
+    direct_vm.sender = direct_alice
+    direct_vm.value = 10**18
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 11, 10, tzinfo=timezone.utc)
+    cover_id = deployed.buy_cover("RAIN", "51.5074", "-0.1278", "2026-12-01", 25000)
+    deployed.cancel_cover(cover_id)
+    deployed._instance._now = real_now
+
+    monkeypatch.setattr(rainline_contract.gl, "get_contract_at", lambda _addr: TransferSink())
+    deployed.withdraw()
+
+    assert deployed.get_credit(direct_alice) == 0

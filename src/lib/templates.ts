@@ -6,6 +6,8 @@ export const TEMPLATES = [
     field: "precipitation_sum",
     hint: "Pays if daily precipitation_sum is at or above the threshold.",
     defaultThreshold: "25",
+    minThreshold: 10,
+    maxThreshold: 100,
   },
   {
     id: "DRY" as const,
@@ -14,6 +16,8 @@ export const TEMPLATES = [
     field: "precipitation_sum",
     hint: "Pays if daily precipitation_sum is at or below the threshold.",
     defaultThreshold: "1",
+    minThreshold: 0,
+    maxThreshold: 1,
   },
   {
     id: "HEAT" as const,
@@ -22,11 +26,14 @@ export const TEMPLATES = [
     field: "temperature_2m_max",
     hint: "Pays if daily temperature_2m_max is at or above the threshold.",
     defaultThreshold: "35",
+    minThreshold: 35,
+    maxThreshold: 55,
   },
 ];
 
 export const PAYOUT_RATIO = 4;
 export const BUY_CUTOFF_HOURS = 24;
+export const MAX_EVENT_EXPOSURE_BPS = 2500;
 export const MIN_PREMIUM = 0.01;
 export const MAX_PREMIUM = 10;
 
@@ -34,6 +41,20 @@ export function toMilli(value: string): number {
   const n = Number(value);
   if (!Number.isFinite(n)) throw new Error("threshold must be a number");
   return Math.round(n * 1000);
+}
+
+export function thresholdRange(template: (typeof TEMPLATES)[number]["id"]) {
+  return TEMPLATES.find((t) => t.id === template)!;
+}
+
+export function validateThreshold(template: (typeof TEMPLATES)[number]["id"], value: string): string | null {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "threshold must be a number";
+  const range = thresholdRange(template);
+  if (n < range.minThreshold || n > range.maxThreshold) {
+    return `${template} threshold must be ${range.minThreshold}-${range.maxThreshold} ${range.unit}`;
+  }
+  return null;
 }
 
 export function fromMilli(value: number | string | null | undefined): string {

@@ -25,6 +25,13 @@ PAYOUT_RATIO = 4
 MIN_PREMIUM_WEI = 10**16  # 0.01 GEN
 MAX_PREMIUM_WEI = 10 * 10**18  # 10 GEN
 BUY_CUTOFF_HOURS = 24
+EXPOSURE_BPS_DENOMINATOR = 10000
+MAX_EVENT_EXPOSURE_BPS = 2500
+UNDERWRITING_LIMITS = {
+    "RAIN": (10000, 100000),  # payout only for material rain days: 10mm-100mm
+    "DRY": (0, 1000),  # dry cover triggers only at or below 1mm
+    "HEAT": (35000, 55000),  # heat cover triggers only for 35C-55C days
+}
 LAT_MIN, LAT_MAX = -90.0, 90.0
 LON_MIN, LON_MAX = -180.0, 180.0
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -97,6 +104,25 @@ def payout_amount(premium_wei: int) -> int:
 
 def extra_reserve(premium_wei: int) -> int:
     return payout_amount(premium_wei) - premium_wei
+
+
+def underwriting_range(template: str) -> tuple[int, int]:
+    if template not in UNDERWRITING_LIMITS:
+        raise ValueError("unknown template")
+    return UNDERWRITING_LIMITS[template]
+
+
+def validate_underwriting(template: str, threshold_milli: int) -> bool:
+    lo, hi = underwriting_range(template)
+    return lo <= int(threshold_milli) <= hi
+
+
+def max_event_exposure(pool_balance_after_premium: int) -> int:
+    return pool_balance_after_premium * MAX_EVENT_EXPOSURE_BPS // EXPOSURE_BPS_DENOMINATOR
+
+
+def event_exposure_allowed(pool_balance_after_premium: int, current_exposure: int, new_payout: int) -> bool:
+    return current_exposure + new_payout <= max_event_exposure(pool_balance_after_premium)
 
 
 def compare_trigger(template: str, observed_milli: int, threshold_milli: int) -> bool:
