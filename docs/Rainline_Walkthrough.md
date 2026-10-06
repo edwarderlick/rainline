@@ -12,10 +12,10 @@ An automated deployment script (`scripts/deploy_studio_next.mjs`) is used to int
 4. Verifies finalized successful execution and the source SHA-256.
 5. Calls `fund_pool` to seed the initial liquidity with **50 GEN**.
 
-The live contract address is: **`0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`**
+The live contract address is: **[`0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043`](https://explorer-studio-dev.genlayer.com/address/0x25FcB91f4Ae2A6122045e6B22Ed54C01860a4043)**
 
-- **Deploy tx:** `0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`
-- **Fund tx:** `0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`
+- **Deploy tx:** [`0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3`](https://explorer-studio-dev.genlayer.com/tx/0x45aebfa02467f209e7c174419b4c415823f2c12f5923c7d5970a11dd7a3ae7e3)
+- **Fund tx:** [`0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353`](https://explorer-studio-dev.genlayer.com/tx/0x53574fbca7df89a8828664cb09d39d6bdbadb5f4df3d74ca81d2f29f4e640353)
 - **Source SHA-256:** `932ac31689367dcfd31d349a2fc616833ff2fb84132ee0053304a4dfbcaf45e0`
 
 ### 2. Frontend Wiring
