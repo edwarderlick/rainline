@@ -237,13 +237,6 @@ async function sendWrite(
     throw new Error("This app writes on Studio Next (chain 61997).");
   }
   const client = writeClient(addr);
-  try {
-    if (typeof window !== "undefined" && provider === (window as unknown as { ethereum?: EthereumProvider }).ethereum) {
-      await client.connect("studioDevnet");
-    }
-  } catch {
-    /* Snaps are MetaMask-only. Chain switch already happened on the selected provider. */
-  }
   const estimate = await client.estimateTransactionFees({
     leaderTimeunitsAllocation: "100",
     validatorTimeunitsAllocation: "200",

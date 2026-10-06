@@ -181,7 +181,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   /**
    * connect(): explicit user click. ALWAYS eth_requestAccounts on the
    * EIP-6963 provider they clicked. That is the MetaMask popup.
-   * client.connect("studioDevnet") is optional and must never replace step 1.
+   * GenLayer SDK chain helpers are intentionally skipped here because injected
+   * wallets already received the explicit account/network requests above.
    */
   const connect = useCallback(
     async (wallet: DetectedWallet) => {
@@ -198,19 +199,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
         setActiveProvider(wallet.provider);
         await switchToStudioNext(wallet.provider);
-        try {
-          const { createClient } = await import("genlayer-js");
-          const { studioDevnet } = await import("genlayer-js/chains");
-          const client = createClient({
-            chain: studioDevnet,
-            account: addr as `0x${string}`,
-            provider: wallet.provider,
-            endpoint: process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ?? "https://studio-next.genlayer.com/api",
-          } as Parameters<typeof createClient>[0]);
-          await client.connect("studioDevnet");
-        } catch {
-          /* Snaps are MetaMask-only. Permission already granted via eth_requestAccounts. */
-        }
         const confirmed = await liveAccounts(wallet.provider);
         if (confirmed.length === 0) {
           clearSession();
