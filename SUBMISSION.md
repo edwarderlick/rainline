@@ -9,12 +9,13 @@ Rainline is a parametric weather cover primitive designed specifically to highli
 - **Chain:** Studio Next `61997`
 - **RPC:** `https://studio-next.genlayer.com/api`
 - **Explorer:** [explorer-studio-dev.genlayer.com](https://explorer-studio-dev.genlayer.com/)
-- **Current contract:** [`0x4656AEA89b67C61A6B99689613735013e8635B0d`](https://explorer-studio-dev.genlayer.com/address/0x4656AEA89b67C61A6B99689613735013e8635B0d)
-- **Deploy tx:** [`0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf`](https://explorer-studio-dev.genlayer.com/tx/0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf)
-- **Fund tx:** [`0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d`](https://explorer-studio-dev.genlayer.com/tx/0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d)
-- **Live buy proof tx:** [`0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09`](https://explorer-studio-dev.genlayer.com/tx/0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09)
-- **Live withdraw proof tx:** [`0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14`](https://explorer-studio-dev.genlayer.com/tx/0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14)
-- **Deployed source SHA-256:** `ba945ed526689aa1e6120c62585d60e100bc53c4239c66d041d15bc5717f2b9a`
+- **Current contract:** [`0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C`](https://explorer-studio-dev.genlayer.com/address/0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C)
+- **Deploy tx:** [`0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345`](https://explorer-studio-dev.genlayer.com/tx/0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345)
+- **Fund tx:** [`0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb`](https://explorer-studio-dev.genlayer.com/tx/0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb)
+- **Live buy proof tx:** [`0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141`](https://explorer-studio-dev.genlayer.com/tx/0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141)
+- **Live cancel credit tx:** [`0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf`](https://explorer-studio-dev.genlayer.com/tx/0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf)
+- **Live withdraw proof tx:** [`0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc`](https://explorer-studio-dev.genlayer.com/tx/0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc)
+- **Deployed source SHA-256:** `bf80404f02b1416a24eae0a34e8cead1a858c817a8d984f145941927cf2ff875`
 
 ### Fit Checklist
 
@@ -33,19 +34,20 @@ Rainline was built to avoid the pitfalls of subjective "AI Courts" and predictio
 * **Subjective labels:** Rainline enforces purely numeric comparisons. "Did it rain heavily?" is replaced with "Was `precipitation_sum >= 5000`?"
 * **UI Mechanics match Contract:** The UI explicitly states that there is no human keeper and no appeals process. The frontend perfectly maps to the contract's fixed methods (`buy_cover`, `cancel_cover`, `resolve`), ensuring users are never promised non-existent on-chain functionality.
 
-### ⚡ Live Settlement Proof (Sept 6, 2026 Covers)
-Earlier live covers proved the `D+1` settlement path. The current hardened Studio Next contract is `0x4656AEA89b67C61A6B99689613735013e8635B0d`; the historical transaction hashes below are retained as settlement evidence from the previous deployment.
+### ⚡ Live Withdrawal Proof (Oct 6, 2026)
+The current hardened Studio Next contract is `0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C`. A live buyer bought a future cover, canceled it before cutoff to create a 1 GEN credit, and then withdrew that credit back to zero.
 
 ### Studio Next Deployment Proof (Oct 6, 2026)
 
-- **Contract:** [`0x4656AEA89b67C61A6B99689613735013e8635B0d`](https://explorer-studio-dev.genlayer.com/address/0x4656AEA89b67C61A6B99689613735013e8635B0d)
-- **Deploy tx:** [`0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf`](https://explorer-studio-dev.genlayer.com/tx/0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf)
-- **Fund tx:** [`0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d`](https://explorer-studio-dev.genlayer.com/tx/0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d)
-- **Live buy proof tx:** [`0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09`](https://explorer-studio-dev.genlayer.com/tx/0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09)
-- **Withdraw credit setup tx:** [`0x902825af25b8ff1263db48370005bac2ebe087944369c5c04885e506be0348cb`](https://explorer-studio-dev.genlayer.com/tx/0x902825af25b8ff1263db48370005bac2ebe087944369c5c04885e506be0348cb)
-- **Live withdraw proof tx:** [`0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14`](https://explorer-studio-dev.genlayer.com/tx/0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14)
-- **Source SHA-256:** `ba945ed526689aa1e6120c62585d60e100bc53c4239c66d041d15bc5717f2b9a`
-- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4. The live buy proof created `cover-0xe01dd0de8e8a663a1c7cd07b56d36317ec2a3483d578021b3240ebd0ffb6e7aa` and reserved a 0.04 GEN payout; the withdraw proof moved a 1 GEN credit and cleared it back to zero.
+- **Contract:** [`0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C`](https://explorer-studio-dev.genlayer.com/address/0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C)
+- **Deploy tx:** [`0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345`](https://explorer-studio-dev.genlayer.com/tx/0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345)
+- **Fund tx:** [`0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb`](https://explorer-studio-dev.genlayer.com/tx/0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb)
+- **Live buy proof tx:** [`0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141`](https://explorer-studio-dev.genlayer.com/tx/0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141)
+- **Cancel credit setup tx:** [`0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf`](https://explorer-studio-dev.genlayer.com/tx/0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf)
+- **Live withdraw proof tx:** [`0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc`](https://explorer-studio-dev.genlayer.com/tx/0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc)
+- **Source SHA-256:** `bf80404f02b1416a24eae0a34e8cead1a858c817a8d984f145941927cf2ff875`
+- **Verified pool state:** 50 GEN funded, `max_event_exposure_bps` = 2500, `payout_ratio` = 4. The live buy proof created `cover-0xd17bede059532cf310504a94662edfd34e32d9572e95fd55823f19a58133394f`; cancel created a 1 GEN credit, and withdraw cleared that credit from `1000000000000000000` to `0`.
+- **Reproducible tests:** `python -m pytest tests/direct tests/unit -q` passes with `24 passed`.
 
 *   **✅ Path: RESOLVED_PAY (Trigger Hit)**
     *   **Params:** Mumbai RAIN, Threshold >= 2.0 mm. 

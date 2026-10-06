@@ -12,35 +12,27 @@ An automated deployment script (`scripts/deploy_studio_next.mjs`) is used to int
 4. Verifies finalized successful execution and the source SHA-256.
 5. Calls `fund_pool` to seed the initial liquidity with **50 GEN**.
 
-The live contract address is: **[`0x4656AEA89b67C61A6B99689613735013e8635B0d`](https://explorer-studio-dev.genlayer.com/address/0x4656AEA89b67C61A6B99689613735013e8635B0d)**
+The live contract address is: **[`0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C`](https://explorer-studio-dev.genlayer.com/address/0x50c7aa4dae8Ac8bD9e42B26E4c1323D83b7CCd0C)**
 
-- **Deploy tx:** [`0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf`](https://explorer-studio-dev.genlayer.com/tx/0x3415428ec168e8995a51b89c22a65e9ebc98f8d5245419483bed294427d278cf)
-- **Fund tx:** [`0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d`](https://explorer-studio-dev.genlayer.com/tx/0x48b60d6e7ca09656fd17fcd48c5b1cd694301d5cc0c887dd40f4019406e7808d)
-- **Live buy proof tx:** [`0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09`](https://explorer-studio-dev.genlayer.com/tx/0xe8cc0e02e1df7bbe40cbf5bf77b09bab66f9041fcdf8c9a9ab57fc32b8e9cb09)
-- **Live withdraw proof tx:** [`0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14`](https://explorer-studio-dev.genlayer.com/tx/0x2724d0062e72c07a04a1927a2a12975ca1c0c60527530bf24cfe47806f8c4f14)
-- **Source SHA-256:** `ba945ed526689aa1e6120c62585d60e100bc53c4239c66d041d15bc5717f2b9a`
+- **Deploy tx:** [`0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345`](https://explorer-studio-dev.genlayer.com/tx/0xa84fa44f586c4cbcc58b40e2031a4fae60d7e094cf6641bcd38ed24abf24d345)
+- **Fund tx:** [`0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb`](https://explorer-studio-dev.genlayer.com/tx/0x8d22eda77d97ec7ea77d72651899b94379f926db8d2a6d49ec68486d7e22a7cb)
+- **Live buy proof tx:** [`0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141`](https://explorer-studio-dev.genlayer.com/tx/0x13dc848c30a339e549abcbf9d8a54e6dd9ab580588fb4538814059ba53c8f141)
+- **Live cancel credit tx:** [`0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf`](https://explorer-studio-dev.genlayer.com/tx/0x280e8487e9bcaad43e4e7666e91a682010f37c5d08412a03b25714a6c06ccbaf)
+- **Live withdraw proof tx:** [`0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc`](https://explorer-studio-dev.genlayer.com/tx/0xbffdbc3da3399f4548949a621d4dc44cdbf87b61833b038a29d0735ece4eecdc)
+- **Source SHA-256:** `bf80404f02b1416a24eae0a34e8cead1a858c817a8d984f145941927cf2ff875`
 
 ### 2. Frontend Wiring
 The frontend was perfectly architected for the transition. All data-fetching layers in `src/lib/rainline.ts` were already utilizing the live SDK. The only change required was:
 - Updating `.env.local` with the deployed address.
 - Fixing a small truthy check bug in `Footer.tsx` where the zero-address `0x00...` evaluated to true. It now correctly relies on `hasContract()`.
 
-### 3. Test Dockets (Live State)
-A second automated script (`scripts/buy_test_dockets.mjs`) was used to act as a buyer, funding a new wallet with 20 GEN and purchasing three covers to prove out the settlement paths.
+### 3. Live Withdrawal Proof
+The script `scripts/prove_withdraw_live.mjs` was used to act as a buyer, fund a fresh wallet, buy a future cover, cancel it before cutoff, and withdraw the resulting credit.
 
-Because the contract strictly enforces that covers must be bought at least 24 hours before the coverage date (`D 00:00 UTC`), these test covers were placed for **`2026-09-03` and `2026-09-04`**.
-
-| ID | Template | Location | Threshold | Premium | Expected Result |
-|---|---|---|---|---|---|
-| `cover-1` | RAIN | Mumbai | 25mm | 1 GEN | Depends on observed rain |
-| `cover-2` | RAIN | Singapore | 100mm | 1 GEN | Likely KEEP |
-| `cover-3` | HEAT | Mumbai | 35°C | 1 GEN | **INSUFFICIENT** (Refund 1 GEN) |
-
-> [!NOTE]
-> **Resolution is Time-Locked**
-> The `resolve` method will revert if called before the coverage day closes. Because these covers target Sept 3rd and 4th, they cannot be resolved right now.
-> 
-> A script is provided at `scripts/resolve_test_dockets.mjs` to trigger the resolutions and verify the payout logic once the dates pass.
+- **Cover ID:** `cover-0xd17bede059532cf310504a94662edfd34e32d9572e95fd55823f19a58133394f`
+- **Credit after cancel:** `1000000000000000000`
+- **Credit after withdraw:** `0`
+- **Reproducible source tests:** `python -m pytest tests/direct tests/unit -q` passes with `24 passed`.
 
 ## Current Pool State
 ```json

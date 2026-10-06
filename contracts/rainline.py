@@ -1,5 +1,7 @@
 # { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 
+from __future__ import annotations
+
 import json
 import re
 import hashlib
@@ -7,6 +9,17 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from genlayer import *
 import genlayer as gl
+try:
+    Address
+    u256
+except NameError:
+    try:
+        from genlayer import types as gl_types
+        Address = gl_types.Address
+        u256 = gl_types.u256
+    except Exception:
+        from gltest.direct.sdk_compat import import_address_u256
+        Address, u256 = import_address_u256()
 try:
     import genlayer.message as gl_message
 except ImportError:
@@ -20,7 +33,11 @@ try:
     from genlayer.storage import DynArray, TreeMap
     allow_storage = genlayer_storage.allow
 except ImportError:
-    pass
+    TreeMap = dict
+    DynArray = list
+
+    def allow_storage(cls):
+        return cls
 
 
 ERROR_EXPECTED = "[EXPECTED]"
@@ -83,12 +100,14 @@ class Rainline(gl.contract.Contract):
     credits: TreeMap[Address, u256]
     event_exposure: TreeMap[str, u256]
     cover_list: DynArray[str]
+    next_cover_nonce: u256
     withdrawing: bool
 
     def __init__(self):
         self.operator = gl.message.sender_address
         self.pool_balance = u256(0)
         self.reserved_payout = u256(0)
+        self.next_cover_nonce = u256(0)
         self.withdrawing = False
 
     def _raw_message_get(self, key: str, default):
@@ -282,7 +301,7 @@ class Rainline(gl.contract.Contract):
         if event_exposure > max_event_exposure:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} event exposure limit exceeded")
 
-        nonce = str(self._raw_message_get("nonce", ""))
+        nonce = self.next_cover_nonce
         created_at = now.isoformat()
         hash_input = f"{gl.message.sender_address}-{created_at}-{template}-{lat_s}-{lon_s}-{coverage_date}-{threshold}-{nonce}"
         try:
@@ -295,6 +314,7 @@ class Rainline(gl.contract.Contract):
         
         if cover_id in self.covers:
             raise gl.vm.UserError(f"{ERROR_EXPECTED} ID collision: {cover_id} already exists")
+        self.next_cover_nonce = nonce + u256(1)
         self.cover_list.append(cover_id)
 
         self.pool_balance = self.pool_balance + premium

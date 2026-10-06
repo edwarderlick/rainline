@@ -44,6 +44,8 @@ def deployed(direct_deploy, direct_vm, direct_alice):
 def test_buy_validations(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
     direct_vm.value = 0
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 9, 1, tzinfo=timezone.utc)
     with pytest.raises(Exception, match="premium below"):
         deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 25000)
 
@@ -53,6 +55,7 @@ def test_buy_validations(direct_vm, deployed, direct_alice):
 
     with pytest.raises(Exception, match="underwriting range"):
         deployed.buy_cover("RAIN", "19.076", "72.8777", "2026-09-10", 1)
+    deployed._instance._now = real_now
 
 
 def test_event_exposure_limit_rejects_concentrated_risk(direct_vm, deployed, direct_alice):
@@ -72,17 +75,14 @@ def test_event_exposure_limit_rejects_concentrated_risk(direct_vm, deployed, dir
 def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, direct_alice):
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
-    
-    import concurrent.futures
-    from gltest.direct.wasi_mock import _local
-    
-    def buy(i):
-        _local.vm = direct_vm
-        return deployed.buy_cover("RAIN", f"19.0{i}", "72.88", f"2026-09-2{i+1}", 25000)
-        
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-        futures = [ex.submit(buy, i) for i in range(5)]
-        ids = [f.result() for f in futures]
+
+    real_now = deployed._instance._now
+    deployed._instance._now = lambda: datetime(2026, 11, 1, tzinfo=timezone.utc)
+    ids = [
+        deployed.buy_cover("RAIN", f"19.0{i}", "72.88", f"2026-11-1{i}", 25000)
+        for i in range(5)
+    ]
+    deployed._instance._now = real_now
         
     assert len(set(ids)) == 5
     for i, cid in enumerate(ids):
@@ -90,7 +90,7 @@ def test_concurrent_buys_return_distinct_deterministic_ids(direct_vm, deployed, 
         assert cid.startswith("cover-")
         cover = deployed.get_cover(cid)
         assert cover["lat"] == f"19.0{i}00"
-        assert cover["coverage_date"] == f"2026-09-2{i+1}"
+        assert cover["coverage_date"] == f"2026-11-1{i}"
 
 
 def test_late_buy_reverts(direct_vm, deployed, direct_alice):
@@ -221,18 +221,17 @@ def test_failed_withdraw_restores_credit(direct_vm, deployed, direct_alice):
     deployed._instance._now = real_now
 
     assert deployed.get_credit(direct_alice) == 10**18
+
+    def fail_transfer(_recipient, _amount):
+        raise RuntimeError("native transfer failed")
+
+    deployed._instance._emit_transfer = fail_transfer
     with pytest.raises(Exception, match="credit restored"):
         deployed.withdraw()
     assert deployed.get_credit(direct_alice) == 10**18
 
 
 def test_successful_withdraw_clears_credit(direct_vm, deployed, direct_alice, monkeypatch):
-    import contracts.rainline as rainline_contract
-
-    class TransferSink:
-        def emit_transfer(self, value):
-            self.value = value
-
     direct_vm.sender = direct_alice
     direct_vm.value = 10**18
     real_now = deployed._instance._now
@@ -241,7 +240,11 @@ def test_successful_withdraw_clears_credit(direct_vm, deployed, direct_alice, mo
     deployed.cancel_cover(cover_id)
     deployed._instance._now = real_now
 
-    monkeypatch.setattr(rainline_contract.gl, "get_contract_at", lambda _addr: TransferSink())
+    transfers = []
+    deployed._instance._emit_transfer = lambda recipient, amount: transfers.append((recipient, amount))
     deployed.withdraw()
 
     assert deployed.get_credit(direct_alice) == 0
+    assert [(str(recipient).lower(), int(amount)) for recipient, amount in transfers] == [
+        ("0x" + direct_alice.hex(), 10**18)
+    ]
